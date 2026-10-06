@@ -18,8 +18,21 @@ class ApiConfig {
     return defaultBaseUrl;
   }
 
-  /// Default to Render Cloud URL for seamless multi-device and real phone testing
-  static String get defaultBaseUrl => renderProductionUrl;
+  /// Chuyển thành true nếu muốn trỏ về Backend máy tính (Localhost / Android 10.0.2.2),
+  /// Chuyển thành false nếu muốn trỏ về Backend Render trên đám mây.
+  static const bool useLocalBackend = true;
+
+  /// Tự động chọn URL mặc định dựa trên cấu hình và thiết bị
+  static String get defaultBaseUrl {
+    if (useLocalBackend) {
+      if (kIsWeb) return _defaultLocalhostUrl;
+      try {
+        if (Platform.isAndroid) return _defaultAndroidEmulatorUrl;
+      } catch (_) {}
+      return _defaultLocalhostUrl;
+    }
+    return renderProductionUrl;
+  }
 
   /// Initialize and load custom base URL from SharedPreferences
   static Future<void> init() async {
