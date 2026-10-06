@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiConfig {
+  static const String renderProductionUrl = 'https://techstore-backend-aa7t.onrender.com/api/v1';
   static const String _defaultAndroidEmulatorUrl = 'http://10.0.2.2:8080/api/v1';
   static const String _defaultLocalhostUrl = 'http://localhost:8080/api/v1';
   static const String _prefKeyBaseUrl = 'techstore_api_base_url';
@@ -17,20 +18,8 @@ class ApiConfig {
     return defaultBaseUrl;
   }
 
-  /// Get the standard default base URL according to the current platform
-  static String get defaultBaseUrl {
-    if (kIsWeb) {
-      return _defaultLocalhostUrl;
-    }
-    try {
-      if (Platform.isAndroid) {
-        return _defaultAndroidEmulatorUrl;
-      }
-    } catch (_) {
-      // Fallback
-    }
-    return _defaultLocalhostUrl;
-  }
+  /// Default to Render Cloud URL for seamless multi-device and real phone testing
+  static String get defaultBaseUrl => renderProductionUrl;
 
   /// Initialize and load custom base URL from SharedPreferences
   static Future<void> init() async {
