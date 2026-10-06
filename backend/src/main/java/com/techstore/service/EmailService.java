@@ -47,18 +47,30 @@ public class EmailService {
         sendHtmlMail(toEmail, subject, content, otpCode);
     }
 
-    @Value("${resend.api-key:}")
+    @Value("${resend.api-key:${RESEND_API_KEY:}}")
     private String resendApiKey;
+
+    private String resolveResendApiKey() {
+        if (resendApiKey != null && !resendApiKey.isBlank()) {
+            return resendApiKey.trim();
+        }
+        String envKey = System.getenv("RESEND_API_KEY");
+        if (envKey != null && !envKey.isBlank()) {
+            return envKey.trim();
+        }
+        return System.getProperty("RESEND_API_KEY");
+    }
 
     private void sendHtmlMail(String toEmail, String subject, String htmlContent, String otpCode) {
         boolean sent = false;
+        String resendKey = resolveResendApiKey();
 
-        // 1. Thử gửi qua Resend API (HTTPS port 443 - không bao giờ bị Render chặn)
-        if (resendApiKey != null && !resendApiKey.isBlank()) {
-            sent = trySendViaResend(toEmail, subject, htmlContent);
+        // 1. Nếu có cấu hình RESEND_API_KEY, thử gửi qua Resend HTTPS port 443 trước (siêu nhanh, không bị chặn)
+        if (resendKey != null && !resendKey.isBlank()) {
+            sent = trySendViaResend(resendKey, toEmail, subject, htmlContent);
         }
 
-        // 2. Thử gửi qua SMTP Gmail (hoạt động tốt ở local hoặc VPS)
+        // 2. Nếu chưa gửi được và không có Resend, thử qua SMTP Gmail (hoạt động tốt ở local)
         if (!sent) {
             try {
                 MimeMessage message = mailSender.createMimeMessage();
@@ -88,12 +100,13 @@ public class EmailService {
                 toEmail, otpCode, sent ? "THÀNH CÔNG" : "CỔNG 587 BỊ CHẶN TRÊN RENDER FREE - LẤY MÃ TẠI ĐÂY");
     }
 
-    private boolean trySendViaResend(String toEmail, String subject, String htmlContent) {
+    private boolean trySendViaResend(String apiKey, String toEmail, String subject, String htmlContent) {
         try {
+            log.info("Đang gửi email xác thực qua Resend API tới: {}...", toEmail);
             org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
             org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
             headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(resendApiKey.trim());
+            headers.setBearerAuth(apiKey);
 
             java.util.Map<String, Object> body = java.util.Map.of(
                     "from", "TechStore <onboarding@resend.dev>",
@@ -103,9 +116,12 @@ public class EmailService {
             );
 
             org.springframework.http.HttpEntity<java.util.Map<String, Object>> entity = new org.springframework.http.HttpEntity<>(body, headers);
-            restTemplate.postForEntity("https://api.resend.com/emails", entity, String.class);
-            log.info("Đã gửi email xác thực thành công qua Resend HTTPS tới: {}", toEmail);
+            org.springframework.http.ResponseEntity<String> res = restTemplate.postForEntity("https://api.resend.com/emails", entity, String.class);
+            log.info("Đã gửi email xác thực thành công qua Resend HTTPS tới: {} (Response: {})", toEmail, res.getBody());
             return true;
+        } catch (org.springframework.web.client.HttpStatusCodeException ex) {
+            log.warn("Resend API phản hồi lỗi (HTTP {}): {}", ex.getStatusCode(), ex.getResponseBodyAsString());
+            return false;
         } catch (Exception e) {
             log.warn("Gửi mail qua Resend thất bại: {}", e.getMessage());
             return false;
