@@ -47,24 +47,68 @@ public class EmailService {
         sendHtmlMail(toEmail, subject, content, otpCode);
     }
 
-    private void sendHtmlMail(String toEmail, String subject, String htmlContent, String otpCode) throws MailException {
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+    @Value("${resend.api-key:}")
+    private String resendApiKey;
 
-            helper.setFrom(mailFrom);
-            helper.setTo(toEmail);
-            helper.setSubject(subject);
-            helper.setText(htmlContent, true);
+    private void sendHtmlMail(String toEmail, String subject, String htmlContent, String otpCode) {
+        boolean sent = false;
 
-            mailSender.send(message);
-            log.info("Đã gửi email xác thực thành công tới: {}", toEmail);
-        } catch (Exception ex) {
-            log.error("Không thể gửi email qua SMTP tới: {}", toEmail, ex);
-            if (ex instanceof MailException mailException) {
-                throw mailException;
+        // 1. Thử gửi qua Resend API (HTTPS port 443 - không bao giờ bị Render chặn)
+        if (resendApiKey != null && !resendApiKey.isBlank()) {
+            sent = trySendViaResend(toEmail, subject, htmlContent);
+        }
+
+        // 2. Thử gửi qua SMTP Gmail (hoạt động tốt ở local hoặc VPS)
+        if (!sent) {
+            try {
+                MimeMessage message = mailSender.createMimeMessage();
+                MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+                helper.setFrom(mailFrom);
+                helper.setTo(toEmail);
+                helper.setSubject(subject);
+                helper.setText(htmlContent, true);
+
+                mailSender.send(message);
+                sent = true;
+                log.info("Đã gửi email xác thực thành công qua SMTP tới: {}", toEmail);
+            } catch (Exception ex) {
+                log.warn("Không thể kết nối cổng SMTP (Cloud Render Free chặn cổng SMTP 587): {}", ex.getMessage());
             }
-            throw new org.springframework.mail.MailSendException("Không thể gửi email xác thực.", ex);
+        }
+
+        // 3. Fallback an toàn: Ghi mã OTP to rõ vào console log để không làm nghẽn luồng đăng ký
+        log.info("\n"
+                + "=================================================================\n"
+                + "⚡ [TECHSTORE OTP NOTIFICATION]\n"
+                + "📧 Người nhận: {}\n"
+                + "🔑 MÃ OTP XÁC THỰC (Hiệu lực 10 phút): {}\n"
+                + "ℹ️ Trạng thái gửi mail thật: {}\n"
+                + "=================================================================",
+                toEmail, otpCode, sent ? "THÀNH CÔNG" : "CỔNG 587 BỊ CHẶN TRÊN RENDER FREE - LẤY MÃ TẠI ĐÂY");
+    }
+
+    private boolean trySendViaResend(String toEmail, String subject, String htmlContent) {
+        try {
+            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(resendApiKey.trim());
+
+            java.util.Map<String, Object> body = java.util.Map.of(
+                    "from", "TechStore <onboarding@resend.dev>",
+                    "to", java.util.List.of(toEmail),
+                    "subject", subject,
+                    "html", htmlContent
+            );
+
+            org.springframework.http.HttpEntity<java.util.Map<String, Object>> entity = new org.springframework.http.HttpEntity<>(body, headers);
+            restTemplate.postForEntity("https://api.resend.com/emails", entity, String.class);
+            log.info("Đã gửi email xác thực thành công qua Resend HTTPS tới: {}", toEmail);
+            return true;
+        } catch (Exception e) {
+            log.warn("Gửi mail qua Resend thất bại: {}", e.getMessage());
+            return false;
         }
     }
 
