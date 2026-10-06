@@ -1,0 +1,16 @@
+@media (max-width: 991.98px) {
+    .hero-banner {
+        padding: 2.5rem 1.5rem;
+        text-align: center;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .hero-banner h1 {
+        font-size: 1.75rem;
+    }
+    
+    .product-image-container {
+        height: 160px;
+    }
+}

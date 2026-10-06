@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bảng Quản Trị Hệ Thống - TechStore</title>
+
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 CSS & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <!-- Custom CSS Modules -->
+    <link rel="stylesheet" href="../../css/variables.css">
+    <link rel="stylesheet" href="../../css/reset.css">
+    <link rel="stylesheet" href="../../css/global.css">
+    <link rel="stylesheet" href="../../css/components.css">
+    <link rel="stylesheet" href="admin.css">
+
+    <!-- Chart.js for Admin Dashboard -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar" id="adminSidebar">
+            <div class="admin-sidebar-header">
+                <a href="admin.html" class="admin-logo">
+                    <i class="bi bi-cpu-fill text-primary"></i>
+                    <span>TECHSTORE</span>
+                </a>
+                <span class="badge bg-warning text-dark admin-role-badge" id="sidebarRoleBadge">STAFF</span>
+            </div>
+
+            <nav class="admin-sidebar-nav">
+                <div class="nav-section-title">Báo Cáo & Thống Kê</div>
+                <a href="#dashboard" class="admin-nav-item active" data-tab="dashboard">
+                    <i class="bi bi-graph-up-arrow"></i>
+                    <span>Tổng Quan</span>
+                </a>
+
+                <div class="nav-section-title">Vận Hành & Bán Hàng</div>
+                <a href="#orders" class="admin-nav-item" data-tab="orders">
+                    <i class="bi bi-box-seam"></i>
+                    <span>Đơn Hàng</span>
+                </a>
+                <a href="#products" class="admin-nav-item" data-tab="products">
+                    <i class="bi bi-laptop"></i>
+                    <span>Sản Phẩm</span>
+                </a>
+                <a href="#inventory" class="admin-nav-item" data-tab="inventory">
+                    <i class="bi bi-boxes"></i>
+                    <span>Kho Hàng</span>
+                </a>
+                <a href="#coupons" class="admin-nav-item" data-tab="coupons">
+                    <i class="bi bi-ticket-perforated"></i>
+                    <span>Khuyến Mãi</span>
+                </a>
+
+                <div class="nav-section-title admin-only">Hệ Thống & Danh Mục</div>
+                <a href="#categories" class="admin-nav-item admin-only" data-tab="categories">
+                    <i class="bi bi-grid"></i>
+                    <span>Danh Mục</span>
+                </a>
+                <a href="#brands" class="admin-nav-item admin-only" data-tab="brands">
+                    <i class="bi bi-tags"></i>
+                    <span>Thương Hiệu</span>
+                </a>
+                <a href="#branches" class="admin-nav-item admin-only" data-tab="branches">
+                    <i class="bi bi-shop-window"></i>
+                    <span>Chi Nhánh</span>
+                </a>
+                <a href="#users" class="admin-nav-item admin-only" data-tab="users">
+                    <i class="bi bi-people"></i>
+                    <span>Người Dùng</span>
+                </a>
+                <a href="#staff" class="admin-nav-item admin-only" data-tab="staff">
+                    <i class="bi bi-person-badge"></i>
+                    <span>Nhân Viên</span>
+                </a>
+            </nav>
+
+            <div class="admin-sidebar-footer">
+                <div class="admin-user-widget mb-3">
+                    <div class="admin-user-avatar" id="userAvatarText">U</div>
+                    <div class="overflow-hidden">
+                        <div class="text-white fw-semibold text-truncate small" id="userNameText">User Name</div>
+                        <div class="text-muted small text-truncate" id="userEmailText">user@techstore.com</div>
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="../../index.html" class="btn btn-outline-light btn-sm w-50" title="Trang cửa hàng">
+                        <i class="bi bi-shop me-1"></i>Shop
+                    </a>
+                    <button class="btn btn-outline-danger btn-sm w-50" id="logoutBtn" title="Đăng xuất">
+                        <i class="bi bi-box-arrow-right me-1"></i>Thoát
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="admin-main">
+            <!-- Topbar -->
+            <header class="admin-topbar">
+                <div class="d-flex align-items-center gap-3">
+                    <button class="btn btn-light d-lg-none" id="mobileSidebarToggle">
+                        <i class="bi bi-list fs-5"></i>
+                    </button>
+                    <div>
+                        <h5 class="fw-bold mb-0" id="pageTitle">Quản Lý Đơn Hàng</h5>
+                        <small class="text-muted" id="pageBreadcrumb">Trang quản trị / Đơn Hàng</small>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-outline-secondary btn-sm" id="refreshBtn" title="Tải lại dữ liệu">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                    <button class="btn btn-primary btn-sm d-flex align-items-center gap-2" id="primaryActionBtn">
+                        <i class="bi bi-plus-circle" id="primaryActionIcon"></i>
+                        <span id="primaryActionText">Thao tác</span>
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm d-none align-items-center gap-2" id="secondaryActionBtn">
+                        <i class="bi bi-arrow-left-right" id="secondaryActionIcon"></i>
+                        <span id="secondaryActionText">Chuyển kho</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div class="admin-content">
+                <!-- ==========================================
+                     1. DASHBOARD VIEW
+                     ========================================== -->
+                <div id="dashboardView">
+                    <!-- Top KPI Metrics -->
+                    <div class="row g-3 mb-4">
+                        <!-- KPI 1: Realized Revenue -->
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="admin-card p-3 h-100 border-start border-4 border-primary">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="text-muted small fw-semibold text-uppercase">Doanh Thu Thực Tế</div>
+                                        <h4 class="fw-bold my-1 text-primary" id="kpiRevenue">0 ₫</h4>
+                                        <small class="text-success"><i class="bi bi-check-circle me-1"></i>Từ đơn hoàn tất</small>
+                                    </div>
+                                    <div class="bg-primary-subtle text-primary p-3 rounded-3 fs-3">
+                                        <i class="bi bi-cash-stack"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- KPI 2: Total Orders -->
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="admin-card p-3 h-100 border-start border-4 border-success">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="text-muted small fw-semibold text-uppercase">Tổng Đơn Hàng</div>
+                                        <h4 class="fw-bold my-1 text-success" id="kpiOrders">0</h4>
+                                        <small class="text-muted" id="kpiCompletedOrders">0 đơn hoàn tất</small>
+                                    </div>
+                                    <div class="bg-success-subtle text-success p-3 rounded-3 fs-3">
+                                        <i class="bi bi-bag-check"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- KPI 3: Cancelled Orders -->
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="admin-card p-3 h-100 border-start border-4 border-danger">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="text-muted small fw-semibold text-uppercase">Đơn Hàng Bị Hủy</div>
+                                        <h4 class="fw-bold my-1 text-danger" id="kpiCancelled">0</h4>
+                                        <small class="text-muted">Đã hoàn trả tồn kho</small>
+                                    </div>
+                                    <div class="bg-danger-subtle text-danger p-3 rounded-3 fs-3">
+                                        <i class="bi bi-x-octagon"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- KPI 4: New Customers -->
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="admin-card p-3 h-100 border-start border-4 border-info">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="text-muted small fw-semibold text-uppercase">Khách Hàng Mới</div>
+                                        <h4 class="fw-bold my-1 text-info" id="kpiNewCustomers">0</h4>
+                                        <small class="text-muted" id="kpiTotalCustomers">Tổng: 0 khách</small>
+                                    </div>
+                                    <div class="bg-info-subtle text-info p-3 rounded-3 fs-3">
+                                        <i class="bi bi-people"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Row 1: Revenue Timeline Line Chart -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-12">
+                            <div class="admin-card p-4">
+                                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+                                    <div>
+                                        <h6 class="fw-bold mb-0"><i class="bi bi-graph-up text-primary me-2"></i>Doanh Thu Theo Thời Gian</h6>
+                                        <small class="text-muted">Tổng doanh thu các đơn hàng thành công theo ngày</small>
+                                    </div>
+                                    <div class="btn-group btn-group-sm" id="timelineRangeGroup">
+                                        <button type="button" class="btn btn-outline-primary" data-days="7">7 ngày</button>
+                                        <button type="button" class="btn btn-outline-primary" data-days="14">14 ngày</button>
+                                        <button type="button" class="btn btn-outline-primary active" data-days="30">30 ngày</button>
+                                    </div>
+                                </div>
+                                <div style="position: relative; height: 320px;">
+                                    <canvas id="revenueTimelineChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Category Distribution & Branch Performance -->
+                    <div class="row g-3 mb-4">
+                        <!-- Category Distribution -->
+                        <div class="col-lg-6">
+                            <div class="admin-card p-4 h-100">
+                                <h6 class="fw-bold mb-1"><i class="bi bi-pie-chart text-info me-2"></i>Doanh Thu Theo Danh Mục</h6>
+                                <small class="text-muted d-block mb-3">Tỷ trọng doanh thu theo từng nhóm ngành hàng</small>
+                                <div style="position: relative; height: 260px;" class="d-flex justify-content-center">
+                                    <canvas id="categoryDistributionChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Branch Performance -->
+                        <div class="col-lg-6">
+                            <div class="admin-card p-4 h-100">
+                                <h6 class="fw-bold mb-1"><i class="bi bi-bar-chart text-success me-2"></i>Doanh Thu Theo Chi Nhánh</h6>
+                                <small class="text-muted d-block mb-3">Hiệu quả kinh doanh của các chi nhánh TechStore</small>
+                                <div style="position: relative; height: 260px;">
+                                    <canvas id="branchPerformanceChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Row 3: Best Selling Products -->
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="admin-card p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div>
+                                        <h6 class="fw-bold mb-0"><i class="bi bi-trophy text-warning me-2"></i>Top 5 Sản Phẩm Bán Chạy Nhất</h6>
+                                        <small class="text-muted">Xếp hạng theo số lượng sản phẩm bán ra từ các đơn hoàn tất</small>
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table admin-table align-middle">
+                                        <thead>
+                                            <tr>
+                                                <th width="70">Xếp Hạng</th>
+                                                <th>Sản Phẩm</th>
+                                                <th>Mã SKU</th>
+                                                <th class="text-center">Số Lượng Đã Bán</th>
+                                                <th class="text-end">Doanh Thu Mang Lại</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="bestSellersTableBody">
+                                            <!-- Populated dynamically via JS -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==========================================
+                     2. STANDARD TABLE VIEW (For other tabs)
+                     ========================================== -->
+                <div id="standardTableView" class="d-none">
+                    <!-- Filter Card -->
+                    <div class="admin-card p-3 mb-3">
+                        <form id="filterForm" class="row g-2 align-items-center">
+                            <div class="col-md-5">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                                    <input type="text" class="form-control" id="filterSearch" placeholder="Tìm kiếm từ khóa...">
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <select class="form-select form-select-sm" id="filterStatus">
+                                    <option value="">Tất cả trạng thái</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-2" id="extraFilterContainer">
+                                <select class="form-select form-select-sm" id="filterExtra">
+                                    <option value="">Tất cả phân loại</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-2 d-flex gap-2">
+                                <button type="submit" class="btn btn-primary btn-sm w-100">
+                                    <i class="bi bi-funnel me-1"></i>Lọc
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" id="filterResetBtn" title="Đặt lại bộ lọc">
+                                    <i class="bi bi-x-circle"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Table Card -->
+                    <div class="admin-card">
+                        <div class="table-responsive">
+                            <table class="table admin-table" id="dataTable">
+                                <thead id="tableHead">
+                                    <!-- Dynamic headers -->
+                                </thead>
+                                <tbody id="tableBody">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Loading State -->
+                        <div id="loadingState" class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <p class="text-muted small mt-2">Đang tải dữ liệu...</p>
+                        </div>
+
+                        <!-- Empty State -->
+                        <div id="emptyState" class="text-center py-5 d-none">
+                            <i class="bi bi-inbox text-muted" style="font-size: 2.5rem;"></i>
+                            <h6 class="mt-2 text-secondary">Không có dữ liệu phù hợp</h6>
+                        </div>
+
+                        <!-- Pagination Footer -->
+                        <div class="p-3 border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+                            <div class="text-muted small" id="paginationInfo">Hiển thị 0 - 0 của 0 kết quả</div>
+                            <ul class="pagination pagination-sm mb-0" id="paginationControls"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ==========================================
+         MODALS CONTAINER
+         ========================================== -->
+
+    <!-- Branch Modal -->
+    <div class="modal fade" id="branchModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="branchForm">
+                    <input type="hidden" id="branchId">
+                    <div class="modal-header">
+                        <h6 class="modal-title fw-bold" id="branchModalTitle">Thông Tin Chi Nhánh</h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Tên chi nhánh <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" id="branchName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Số điện thoại</label>
+                            <input type="text" class="form-control form-control-sm" id="branchPhone">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Địa chỉ <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" id="branchAddress" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Trạng thái</label>
+                            <select class="form-select form-select-sm" id="branchStatus">
+                                <option value="ACTIVE">Hoạt động (ACTIVE)</option>
+                                <option value="INACTIVE">Tạm dừng (INACTIVE)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary btn-sm">Lưu chi nhánh</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Staff Create Modal -->
+    <div class="modal fade" id="staffModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="staffForm">
+                    <div class="modal-header">
+                        <h6 class="modal-title fw-bold">Tạo Tài Khoản Nhân Viên Mới</h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Họ và tên <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" id="staffFullName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Email <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control form-control-sm" id="staffEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Số điện thoại <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" id="staffPhone" placeholder="0901234567" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Mật khẩu khởi tạo <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control form-control-sm" id="staffPassword" minlength="6" value="password123" required>
+                            <div class="form-text small">Mặc định là 'password123', nhân viên có thể đổi sau.</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary btn-sm">Tạo nhân viên</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Modal -->
+    <div class="modal fade" id="categoryModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="categoryForm">
+                    <input type="hidden" id="categoryId">
+                    <div class="modal-header">
+                        <h6 class="modal-title fw-bold" id="categoryModalTitle">Danh Mục Sản Phẩm</h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Tên danh mục <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" id="categoryName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Mô tả</label>
+                            <textarea class="form-control form-control-sm" id="categoryDescription" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Ảnh URL</label>
+                            <input type="url" class="form-control form-control-sm" id="categoryImageUrl">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary btn-sm">Lưu danh mục</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Brand Modal -->
+    <div class="modal fade" id="brandModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="brandForm">
+                    <input type="hidden" id="brandId">
+                    <div class="modal-header">
+                        <h6 class="modal-title fw-bold" id="brandModalTitle">Thương Hiệu</h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Tên thương hiệu <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" id="brandName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Mô tả</label>
+                            <textarea class="form-control form-control-sm" id="brandDescription" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Logo URL</label>
+                            <input type="url" class="form-control form-control-sm" id="brandLogoUrl">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary btn-sm">Lưu thương hiệu</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inventory Adjust Modal -->
+    <div class="modal fade" id="adjustStockModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="adjustStockForm">
+                    <div class="modal-header">
+                        <h6 class="modal-title fw-bold">Điều Chỉnh Tồn Kho Sản Phẩm</h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Sản phẩm <span class="text-danger">*</span></label>
+                            <select class="form-select form-select-sm" id="adjustProductId" required></select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Chi nhánh <span class="text-danger">*</span></label>
+                            <select class="form-select form-select-sm" id="adjustBranchId" required></select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Hình thức điều chỉnh <span class="text-danger">*</span></label>
+                            <select class="form-select form-select-sm" id="adjustType" required>
+                                <option value="ADD">Nhập thêm (+) / Tăng tồn kho</option>
+                                <option value="SUBTRACT">Xuất kho (-) / Giảm tồn kho</option>
+                                <option value="SET">Thiết lập trực tiếp (=) / Kiểm kê</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Số lượng <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control form-control-sm" id="adjustQuantity" min="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Lý do điều chỉnh</label>
+                            <input type="text" class="form-control form-control-sm" id="adjustReason" placeholder="VD: Nhập hàng từ nhà cung cấp, kiểm kê định kỳ">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary btn-sm">Xác nhận điều chỉnh</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inventory Transfer Modal -->
+    <div class="modal fade" id="transferStockModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="transferStockForm">
+                    <div class="modal-header">
+                        <h6 class="modal-title fw-bold">Điều Chuyển Kho Giữa Các Chi Nhánh</h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Sản phẩm <span class="text-danger">*</span></label>
+                            <select class="form-select form-select-sm" id="transferProductId" required></select>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold">Từ chi nhánh <span class="text-danger">*</span></label>
+                                <select class="form-select form-select-sm" id="transferFromBranchId" required></select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold">Đến chi nhánh <span class="text-danger">*</span></label>
+                                <select class="form-select form-select-sm" id="transferToBranchId" required></select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Số lượng chuyển <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control form-control-sm" id="transferQuantity" min="1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Ghi chú điều chuyển</label>
+                            <input type="text" class="form-control form-control-sm" id="transferNotes" placeholder="VD: Hỗ trợ chi nhánh thiếu hàng">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary btn-sm">Xác nhận điều chuyển</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1080;">
+        <div id="adminToast" class="toast align-items-center border-0 text-white bg-success" role="alert">
+            <div class="d-flex">
+                <div class="toast-body" id="toastMessage">Thông báo</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="admin.js"></script>
+</body>
+</html>

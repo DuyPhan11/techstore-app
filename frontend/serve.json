@@ -1,0 +1,19 @@
+{
+  "cleanUrls": true,
+  "directoryListing": false,
+  "rewrites": [
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/index", "destination": "/index.html" }
+  ],
+  "redirects": [
+    { "source": "/login", "destination": "/pages/auth/login.html", "type": 302 },
+    { "source": "/register", "destination": "/pages/auth/register.html", "type": 302 },
+    { "source": "/forgot-password", "destination": "/pages/auth/forgot-password.html", "type": 302 },
+    { "source": "/products", "destination": "/pages/products/products.html", "type": 302 },
+    { "source": "/cart", "destination": "/pages/cart/cart.html", "type": 302 },
+    { "source": "/checkout", "destination": "/pages/cart/checkout.html", "type": 302 },
+    { "source": "/my-orders", "destination": "/pages/orders/my-orders.html", "type": 302 },
+    { "source": "/orders", "destination": "/pages/orders/my-orders.html", "type": 302 },
+    { "source": "/admin", "destination": "/pages/admin/admin.html", "type": 302 }
+  ]
+}

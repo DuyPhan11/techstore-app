@@ -1,0 +1,22 @@
+package com.techstore.dto;
+
+import com.techstore.enums.OrderStatus;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class OrderStatusUpdateRequest {
+
+    @NotNull(message = "New order status is required")
+    private OrderStatus status;
+
+    private String notes;
+}
+
+

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đơn Hàng Của Tôi - TechStore</title>
+    
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 CSS & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS Modules -->
+    <link rel="stylesheet" href="../../css/variables.css">
+    <link rel="stylesheet" href="../../css/reset.css">
+    <link rel="stylesheet" href="../../css/global.css">
+    <link rel="stylesheet" href="../../css/components.css">
+    <link rel="stylesheet" href="../../css/responsive.css">
+
+    <style>
+        .order-card {
+            border: 1px solid var(--gray-200, #e9ecef);
+            border-radius: 10px;
+            transition: box-shadow 0.2s ease, border-color 0.2s ease;
+            background: #fff;
+        }
+        .order-card:hover {
+            box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+            border-color: #dee2e6;
+        }
+        .status-badge {
+            font-size: 0.85rem;
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .order-thumb {
+            width: 64px;
+            height: 64px;
+            object-fit: contain;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #eee;
+            padding: 4px;
+        }
+        .nav-pills .nav-link {
+            color: #495057;
+            font-weight: 500;
+            border-radius: 20px;
+            padding: 0.5rem 1.25rem;
+        }
+        .nav-pills .nav-link.active {
+            background-color: #0d6efd;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header / Navbar -->
+    <header class="site-navbar sticky-top">
+        <div class="container">
+            <nav class="navbar navbar-expand-lg navbar-light py-3">
+                <a class="navbar-brand" href="../../index.html">
+                    <i class="bi bi-cpu-fill"></i>
+                    <span>TECHSTORE</span>
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarMain">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+                        <li class="nav-item">
+                            <a class="nav-link fw-medium" href="../../index.html">Trang chủ</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link fw-medium" href="../products/products.html">Sản phẩm</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active fw-medium" href="my-orders.html">Đơn mua của tôi</a>
+                        </li>
+                    </ul>
+
+                    <div class="d-flex align-items-center gap-3">
+                        <a href="../cart/cart.html" class="btn btn-outline-primary position-relative" title="Giỏ hàng">
+                            <i class="bi bi-cart3"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cart-badge" style="display:none;">0</span>
+                        </a>
+
+                        <div id="authNavContainer">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container my-5">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="../../index.html" class="text-decoration-none">Trang chủ</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Đơn mua của tôi</li>
+            </ol>
+        </nav>
+
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+            <div>
+                <h1 class="h3 fw-bold mb-1"><i class="bi bi-box-seam me-2 text-primary"></i>Đơn Mua Của Tôi</h1>
+                <p class="text-muted mb-0">Theo dõi tiến trình và quản lý các đơn hàng bạn đã mua</p>
+            </div>
+            <a href="../products/products.html" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>Tiếp tục mua sắm
+            </a>
+        </div>
+
+        <!-- Filter Status Tabs -->
+        <div class="bg-white p-2 rounded-3 border mb-4">
+            <ul class="nav nav-pills" id="orderStatusTabs">
+                <li class="nav-item">
+                    <button class="nav-link active" data-status="">Tất cả</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-status="CONFIRMED">Đã xác nhận</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-status="SHIPPING">Đang vận chuyển</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-status="COMPLETED">Đã giao thành công</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-status="CANCELLED">Đã hủy</button>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Loading State -->
+        <div id="ordersLoading" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Đang tải...</span>
+            </div>
+            <p class="mt-2 text-muted">Đang tải danh sách đơn hàng...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div id="ordersEmpty" class="text-center py-5 d-none bg-white rounded-3 border p-5">
+            <div class="mb-3 text-muted display-4">
+                <i class="bi bi-inbox"></i>
+            </div>
+            <h5 class="fw-semibold">Bạn chưa có đơn hàng nào</h5>
+            <p class="text-muted mb-4">Khám phá hàng ngàn sản phẩm công nghệ hấp dẫn tại TechStore!</p>
+            <a href="../products/products.html" class="btn btn-primary px-4 py-2">Khám phá sản phẩm</a>
+        </div>
+
+        <!-- Orders List Container -->
+        <div id="ordersList" class="d-none d-flex flex-column gap-3">
+            <!-- Rendered by JS -->
+        </div>
+
+        <!-- Pagination -->
+        <div id="ordersPagination" class="d-none mt-4 d-flex justify-content-center">
+            <ul class="pagination mb-0" id="paginationList"></ul>
+        </div>
+    </main>
+
+    <!-- Cancel Order Confirmation Modal -->
+    <div class="modal fade" id="cancelOrderModal" tabindex="-1" aria-labelledby="cancelOrderModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="cancelOrderModalLabel">
+                        <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>Xác nhận hủy đơn hàng
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-2">Bạn có chắc chắn muốn hủy đơn hàng <strong id="cancelModalOrderCode">#ORD</strong> không?</p>
+                    <div class="alert alert-warning py-2 mb-3 small">
+                        <i class="bi bi-info-circle me-1"></i> Số lượng sản phẩm sẽ được tự động hoàn lại kho. Nếu đã thanh toán trực tuyến, số tiền sẽ được hoàn trả.
+                    </div>
+                    <div class="mb-3">
+                        <label for="cancelReasonInput" class="form-label small fw-semibold">Lý do hủy đơn (không bắt buộc):</label>
+                        <select id="cancelReasonSelect" class="form-select mb-2">
+                            <option value="Tôi muốn thay đổi địa chỉ nhận hàng">Tôi muốn thay đổi địa chỉ nhận hàng</option>
+                            <option value="Tôi muốn thay đổi sản phẩm / số lượng">Tôi muốn thay đổi sản phẩm / số lượng</option>
+                            <option value="Tìm thấy giá tốt hơn ở nơi khác">Tìm thấy giá tốt hơn ở nơi khác</option>
+                            <option value="Đổi ý, không muốn mua nữa">Đổi ý, không muốn mua nữa</option>
+                            <option value="other">Lý do khác...</option>
+                        </select>
+                        <textarea id="cancelReasonOther" class="form-control d-none" rows="2" placeholder="Nhập lý do cụ thể..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-danger" id="confirmCancelBtn">
+                        <span class="spinner-border spinner-border-sm d-none me-1" id="cancelBtnSpinner"></span>
+                        Xác nhận hủy đơn
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Page Logic Module -->
+    <script type="module" src="my-orders.js"></script>
+</body>
+</html>

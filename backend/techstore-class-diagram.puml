@@ -1,0 +1,346 @@
+@startuml
+title TechStore — Class Diagram (Domain và các lớp ứng dụng chính)
+left to right direction
+skinparam packageStyle rectangle
+skinparam classAttributeIconSize 0
+hide empty methods
+
+package "entity" {
+  abstract class BaseEntity {
+    -createdAt: LocalDateTime
+    -updatedAt: LocalDateTime
+  }
+
+  class User {
+    -id: Long
+    -email: String
+    -phone: String
+    -password: String
+    -fullName: String
+    -avatarUrl: String
+    -status: UserStatus
+  }
+  class Role {
+    -id: Long
+    -name: RoleName
+  }
+  class Address {
+    -id: Long
+    -recipientName: String
+    -phone: String
+    -streetAddress: String
+    -ward: String
+    -district: String
+    -city: String
+    -isDefault: Boolean
+  }
+  class PasswordResetToken {
+    -id: Long
+    -token: String
+    -expiryDate: LocalDateTime
+    -isUsed: Boolean
+    -createdAt: LocalDateTime
+  }
+  class Category {
+    -id: Long
+    -name: String
+    -slug: String
+    -description: String
+    -imageUrl: String
+    -status: String
+  }
+  class Brand {
+    -id: Long
+    -name: String
+    -slug: String
+    -logoUrl: String
+    -description: String
+    -status: String
+  }
+  class Product {
+    -id: Long
+    -name: String
+    -slug: String
+    -sku: String
+    -price: BigDecimal
+    -costPrice: BigDecimal
+    -description: String
+    -specifications: String
+    -status: ProductStatus
+  }
+  class ProductImage {
+    -id: Long
+    -imageUrl: String
+    -isPrimary: Boolean
+    -displayOrder: Integer
+  }
+  class Branch {
+    -id: Long
+    -name: String
+    -phone: String
+    -address: String
+    -status: String
+  }
+  class Inventory {
+    -id: Long
+    -quantity: Integer
+    -minStockAlert: Integer
+    -updatedAt: LocalDateTime
+  }
+  class Cart {
+    -id: Long
+  }
+  class CartItem {
+    -id: Long
+    -quantity: Integer
+  }
+  class Coupon {
+    -id: Long
+    -code: String
+    -discountType: DiscountType
+    -discountValue: BigDecimal
+    -minOrderAmount: BigDecimal
+    -maxDiscountAmount: BigDecimal
+    -usageLimit: Integer
+    -usedCount: Integer
+    -startDate: LocalDateTime
+    -endDate: LocalDateTime
+    -isActive: Boolean
+  }
+  class Order {
+    -id: Long
+    -orderCode: String
+    -recipientName: String
+    -recipientPhone: String
+    -shippingAddress: String
+    -totalItemsAmount: BigDecimal
+    -discountAmount: BigDecimal
+    -finalAmount: BigDecimal
+    -status: OrderStatus
+    -paymentMethod: PaymentMethod
+    -paymentStatus: PaymentStatus
+    -notes: String
+  }
+  class OrderItem {
+    -id: Long
+    -productName: String
+    -productSku: String
+    -productImage: String
+    -unitPrice: BigDecimal
+    -quantity: Integer
+    -subtotalAmount: BigDecimal
+  }
+  class Payment {
+    -id: Long
+    -paymentMethod: PaymentMethod
+    -transactionCode: String
+    -amount: BigDecimal
+    -status: PaymentStatus
+    -paidAt: LocalDateTime
+    -createdAt: LocalDateTime
+  }
+  class CouponUsage {
+    -id: Long
+    -usedAt: LocalDateTime
+  }
+  class Review {
+    -id: Long
+    -rating: Integer
+    -comment: String
+  }
+  class AuditLog {
+    -id: Long
+    -userId: Long
+    -action: String
+    -entityName: String
+    -entityId: Long
+    -details: String
+    -ipAddress: String
+    -createdAt: LocalDateTime
+  }
+
+  User --|> BaseEntity
+  Address --|> BaseEntity
+  Category --|> BaseEntity
+  Brand --|> BaseEntity
+  Branch --|> BaseEntity
+  Product --|> BaseEntity
+  Order --|> BaseEntity
+  Cart --|> BaseEntity
+  CartItem --|> BaseEntity
+  Review --|> BaseEntity
+
+  User "0..*" -- "0..*" Role : user_roles
+  User "1" -- "0..*" Address
+  User "1" -- "0..*" PasswordResetToken
+  User "1" -- "0..1" Cart
+  Category "1" -- "0..*" Product
+  Brand "1" -- "0..*" Product
+  Product "1" *-- "0..*" ProductImage
+  Product "1" -- "0..*" Inventory
+  Branch "1" -- "0..*" Inventory
+  Cart "1" *-- "0..*" CartItem
+  Product "1" -- "0..*" CartItem
+  User "1" -- "0..*" Order
+  Branch "1" -- "0..*" Order
+  Coupon "0..1" -- "0..*" Order
+  Order "1" *-- "1..*" OrderItem
+  Product "1" -- "0..*" OrderItem
+  Order "1" -- "0..1" Payment
+  Coupon "1" -- "0..*" CouponUsage
+  User "1" -- "0..*" CouponUsage
+  Order "1" -- "0..*" CouponUsage
+  User "1" -- "0..*" Review
+  Product "1" -- "0..*" Review
+  Order "1" -- "0..*" Review
+  User "0..1" .. AuditLog : actor id (no FK)
+}
+
+package "enums" {
+  enum UserStatus
+  enum RoleName
+  enum ProductStatus
+  enum OrderStatus
+  enum PaymentMethod
+  enum PaymentStatus
+  enum DiscountType
+  enum AdjustmentType
+}
+User ..> UserStatus
+Role ..> RoleName
+Product ..> ProductStatus
+Order ..> OrderStatus
+Order ..> PaymentMethod
+Order ..> PaymentStatus
+Payment ..> PaymentMethod
+Payment ..> PaymentStatus
+Coupon ..> DiscountType
+
+package "service interfaces" {
+  interface AuthService
+  interface UserService
+  interface ProductService
+  interface CategoryService
+  interface BrandService
+  interface BranchService
+  interface CartService
+  interface CheckoutService
+  interface OrderService
+  interface CouponService
+  interface InventoryService
+  interface ReviewService
+  interface DashboardService
+  class PasswordResetMailService
+}
+class AuthServiceImpl
+class ProductServiceImpl
+class CategoryServiceImpl
+class BrandServiceImpl
+class BranchServiceImpl
+class CartServiceImpl
+class CheckoutServiceImpl
+class CouponServiceImpl
+class InventoryServiceImpl
+class OrderServiceImpl
+class ReviewServiceImpl
+class DashboardServiceImpl
+AuthServiceImpl ..|> AuthService
+ProductServiceImpl ..|> ProductService
+CategoryServiceImpl ..|> CategoryService
+BrandServiceImpl ..|> BrandService
+BranchServiceImpl ..|> BranchService
+CartServiceImpl ..|> CartService
+CheckoutServiceImpl ..|> CheckoutService
+CouponServiceImpl ..|> CouponService
+InventoryServiceImpl ..|> InventoryService
+OrderServiceImpl ..|> OrderService
+ReviewServiceImpl ..|> ReviewService
+DashboardServiceImpl ..|> DashboardService
+
+package "controllers (HTTP API)" {
+  class AuthController
+  class ProductController
+  class CategoryController
+  class BrandController
+  class BranchController
+  class CartController
+  class CheckoutController
+  class OrderController
+  class ReviewController
+  class AdminUserController
+  class AdminStaffController
+  class AdminOrderController
+  class AdminInventoryController
+  class AdminCouponController
+  class AdminBranchController
+  class AdminDashboardController
+}
+
+AuthController --> AuthService
+ProductController --> ProductService
+CategoryController --> CategoryService
+BrandController --> BrandService
+BranchController --> BranchService
+CartController --> CartService
+CheckoutController --> CheckoutService
+OrderController --> OrderService
+ReviewController --> ReviewService
+AdminUserController --> UserService
+AdminStaffController --> UserService
+AdminOrderController --> OrderService
+AdminInventoryController --> InventoryService
+AdminCouponController --> CouponService
+AdminBranchController --> BranchService
+AdminDashboardController --> DashboardService
+
+package "repositories (Spring Data JPA)" {
+  interface UserRepository
+  interface RoleRepository
+  interface AddressRepository
+  interface PasswordResetTokenRepository
+  interface ProductRepository
+  interface ProductImageRepository
+  interface CategoryRepository
+  interface BrandRepository
+  interface BranchRepository
+  interface InventoryRepository
+  interface CartRepository
+  interface CartItemRepository
+  interface CouponRepository
+  interface OrderRepository
+  interface OrderItemRepository
+  interface PaymentRepository
+  interface CouponUsageRepository
+  interface ReviewRepository
+  interface AuditLogRepository
+}
+
+UserRepository ..> User
+RoleRepository ..> Role
+AddressRepository ..> Address
+PasswordResetTokenRepository ..> PasswordResetToken
+ProductRepository ..> Product
+ProductImageRepository ..> ProductImage
+CategoryRepository ..> Category
+BrandRepository ..> Brand
+BranchRepository ..> Branch
+InventoryRepository ..> Inventory
+CartRepository ..> Cart
+CartItemRepository ..> CartItem
+CouponRepository ..> Coupon
+OrderRepository ..> Order
+OrderItemRepository ..> OrderItem
+PaymentRepository ..> Payment
+CouponUsageRepository ..> CouponUsage
+ReviewRepository ..> Review
+AuditLogRepository ..> AuditLog
+
+note bottom of AuditLog
+  userId/entityId are scalar audit references,
+  not JPA relationships / database foreign keys.
+end note
+note bottom of OrderItem
+  OrderItem.productName, productSku and unitPrice
+  are snapshots recorded when the order is placed.
+end note
+@enduml

@@ -1,0 +1,25 @@
+import assert from 'node:assert/strict';
+
+const storage = new Map();
+globalThis.localStorage = { getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value), removeItem: key => storage.delete(key) };
+let redirect;
+globalThis.location = { protocol: 'http:', hostname: 'localhost', pathname: '/pages/checkout/checkout.html', search: '?branch=1', hash: '', assign: value => { redirect = value; } };
+globalThis.document = { querySelector: () => null };
+const { Auth } = await import('../frontend/js/auth/auth.js');
+const token = exp => 'header.' + Buffer.from(JSON.stringify({ exp })).toString('base64url') + '.signature';
+Auth.setAuth(token(Math.floor(Date.now() / 1000) - 1), { roles: ['ADMIN'] });
+assert.equal(Auth.isAuthenticated(), false);
+assert.equal(Auth.getUser(), null);
+Auth.setAuth('malformed', { roles: ['ADMIN'] });
+assert.equal(Auth.isAuthenticated(), false);
+Auth.setAuth(token(Math.floor(Date.now() / 1000) + 60), { roles: ['ADMIN'] });
+assert.equal(Auth.isAuthenticated(), true);
+const { apiRequest } = await import('../frontend/js/api/api-client.js');
+globalThis.fetch = async () => ({ status: 401, ok: false, json: async () => ({ message: 'Expired' }) });
+await assert.rejects(apiRequest('/checkout'), error => error.status === 401);
+assert.equal(Auth.getToken(), null);
+assert.equal(redirect, '/pages/auth/login.html?redirect=%2Fpages%2Fcheckout%2Fcheckout.html%3Fbranch%3D1');
+redirect = undefined;
+await assert.rejects(apiRequest('/auth/login'), error => error.status === 401);
+assert.equal(redirect, undefined);
+console.log('Frontend auth checks passed: expired/malformed/valid token, API 401 redirect, login failure.');

@@ -1,0 +1,258 @@
+// TechStore — derived from database/schema.sql and backend JPA entities
+// Paste into https://dbdiagram.io
+
+Table roles {
+  id bigint [pk, increment]
+  name varchar(30) [not null, unique]
+}
+
+Table users {
+  id bigint [pk, increment]
+  email varchar(100) [not null, unique]
+  phone varchar(20) [not null, unique]
+  password varchar(255) [not null]
+  full_name varchar(100) [not null]
+  avatar_url varchar(255)
+  status varchar(20) [not null, default: 'ACTIVE']
+  created_at datetime [not null]
+  updated_at datetime
+}
+
+Table user_roles {
+  user_id bigint [not null, pk]
+  role_id bigint [not null, pk]
+}
+
+Table addresses {
+  id bigint [pk, increment]
+  user_id bigint [not null]
+  recipient_name varchar(100) [not null]
+  phone varchar(20) [not null]
+  street_address varchar(255) [not null]
+  ward varchar(100)
+  district varchar(100)
+  city varchar(100) [not null]
+  is_default boolean [not null, default: false]
+  created_at datetime [not null]
+  updated_at datetime
+}
+
+Table password_reset_tokens {
+  id bigint [pk, increment]
+  user_id bigint [not null]
+  token varchar(255) [not null, unique]
+  expiry_date datetime [not null]
+  is_used boolean [not null, default: false]
+  created_at datetime [not null]
+}
+
+Table categories {
+  id bigint [pk, increment]
+  name varchar(100) [not null]
+  slug varchar(100) [not null, unique]
+  description text
+  image_url varchar(255)
+  status varchar(20) [not null, default: 'ACTIVE']
+  created_at datetime [not null]
+  updated_at datetime
+}
+
+Table brands {
+  id bigint [pk, increment]
+  name varchar(100) [not null]
+  slug varchar(100) [not null, unique]
+  logo_url varchar(255)
+  description text
+  status varchar(20) [not null, default: 'ACTIVE']
+  created_at datetime [not null]
+  updated_at datetime
+}
+
+Table branches {
+  id bigint [pk, increment]
+  name varchar(150) [not null]
+  phone varchar(20)
+  address varchar(255) [not null]
+  status varchar(20) [not null, default: 'ACTIVE']
+  created_at datetime [not null]
+  updated_at datetime
+}
+
+Table products {
+  id bigint [pk, increment]
+  category_id bigint [not null]
+  brand_id bigint [not null]
+  name varchar(200) [not null]
+  slug varchar(255) [not null, unique]
+  sku varchar(50) [not null, unique]
+  price decimal(15,2) [not null]
+  cost_price decimal(15,2) [not null]
+  description longtext
+  specifications text
+  status varchar(20) [not null, default: 'ACTIVE']
+  created_at datetime [not null]
+  updated_at datetime
+}
+
+Table product_images {
+  id bigint [pk, increment]
+  product_id bigint [not null]
+  image_url varchar(255) [not null]
+  is_primary boolean [not null, default: false]
+  display_order int [not null, default: 0]
+}
+
+Table inventories {
+  id bigint [pk, increment]
+  product_id bigint [not null]
+  branch_id bigint [not null]
+  quantity int [not null, default: 0]
+  min_stock_alert int [not null, default: 5]
+  updated_at datetime
+
+  indexes {
+    (product_id, branch_id) [unique, name: 'uk_inventories_product_branch']
+  }
+}
+
+Table carts {
+  id bigint [pk, increment]
+  user_id bigint [not null, unique]
+  created_at datetime [not null]
+  updated_at datetime
+}
+
+Table cart_items {
+  id bigint [pk, increment]
+  cart_id bigint [not null]
+  product_id bigint [not null]
+  quantity int [not null, default: 1]
+  created_at datetime [not null]
+  updated_at datetime
+
+  indexes {
+    (cart_id, product_id) [unique, name: 'uk_cart_items_cart_product']
+  }
+}
+
+Table coupons {
+  id bigint [pk, increment]
+  code varchar(50) [not null, unique]
+  discount_type varchar(20) [not null]
+  discount_value decimal(15,2) [not null]
+  min_order_amount decimal(15,2) [not null, default: 0.00]
+  max_discount_amount decimal(15,2)
+  usage_limit int [not null, default: 100]
+  used_count int [not null, default: 0]
+  start_date datetime [not null]
+  end_date datetime [not null]
+  is_active boolean [not null, default: true]
+  created_at datetime [not null]
+  updated_at datetime
+}
+
+Table orders {
+  id bigint [pk, increment]
+  order_code varchar(50) [not null, unique]
+  user_id bigint [not null]
+  branch_id bigint [not null]
+  recipient_name varchar(100) [not null]
+  recipient_phone varchar(20) [not null]
+  shipping_address varchar(255) [not null]
+  total_items_amount decimal(15,2) [not null]
+  discount_amount decimal(15,2) [not null, default: 0.00]
+  final_amount decimal(15,2) [not null]
+  status varchar(30) [not null, default: 'PENDING']
+  payment_method varchar(20) [not null]
+  payment_status varchar(20) [not null, default: 'UNPAID']
+  coupon_id bigint
+  notes text
+  created_at datetime [not null]
+  updated_at datetime
+}
+
+Table order_items {
+  id bigint [pk, increment]
+  order_id bigint [not null]
+  product_id bigint [not null]
+  product_name varchar(200) [not null]
+  product_sku varchar(50) [not null]
+  product_image varchar(255)
+  unit_price decimal(15,2) [not null]
+  quantity int [not null]
+  subtotal_amount decimal(15,2) [not null]
+}
+
+Table payments {
+  id bigint [pk, increment]
+  order_id bigint [not null, unique]
+  payment_method varchar(20) [not null]
+  transaction_code varchar(100) [unique]
+  amount decimal(15,2) [not null]
+  status varchar(20) [not null, default: 'UNPAID']
+  paid_at datetime
+  created_at datetime [not null]
+}
+
+Table coupon_usages {
+  id bigint [pk, increment]
+  coupon_id bigint [not null]
+  user_id bigint [not null]
+  order_id bigint [not null]
+  used_at datetime [not null]
+
+  indexes {
+    (coupon_id, user_id, order_id) [unique, name: 'uk_coupon_usages_coupon_user_order']
+  }
+}
+
+Table reviews {
+  id bigint [pk, increment]
+  user_id bigint [not null]
+  product_id bigint [not null]
+  order_id bigint [not null]
+  rating int [not null, note: 'CHECK rating BETWEEN 1 AND 5']
+  comment text
+  created_at datetime [not null]
+  updated_at datetime
+
+  indexes {
+    (user_id, product_id, order_id) [unique, name: 'uk_reviews_user_product_order']
+  }
+}
+
+Table audit_logs {
+  id bigint [pk, increment]
+  user_id bigint
+  action varchar(100) [not null]
+  entity_name varchar(50) [not null]
+  entity_id bigint
+  details text
+  ip_address varchar(50)
+  created_at datetime [not null]
+}
+
+Ref: user_roles.user_id > users.id
+Ref: user_roles.role_id > roles.id
+Ref: addresses.user_id > users.id
+Ref: password_reset_tokens.user_id > users.id
+Ref: products.category_id > categories.id
+Ref: products.brand_id > brands.id
+Ref: product_images.product_id > products.id
+Ref: inventories.product_id > products.id
+Ref: inventories.branch_id > branches.id
+Ref: carts.user_id - users.id
+Ref: cart_items.cart_id > carts.id
+Ref: cart_items.product_id > products.id
+Ref: orders.user_id > users.id
+Ref: orders.branch_id > branches.id
+Ref: orders.coupon_id > coupons.id
+Ref: order_items.order_id > orders.id
+Ref: order_items.product_id > products.id
+Ref: payments.order_id - orders.id
+Ref: coupon_usages.coupon_id > coupons.id
+Ref: coupon_usages.user_id > users.id
+Ref: coupon_usages.order_id > orders.id
+Ref: reviews.user_id > users.id
+Ref: reviews.product_id > products.id
+Ref: reviews.order_id > orders.id
