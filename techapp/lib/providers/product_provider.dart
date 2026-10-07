@@ -93,15 +93,20 @@ class ProductProvider extends ChangeNotifier {
   int _requestId = 0;
 
   Future<void> fetchProducts({bool reset = false}) async {
+    if (!reset) {
+      if (_isLoadingMore || _isLastPage || _isLoading) return;
+    }
+
     final currentRequestId = ++_requestId;
     if (reset) {
       _currentPage = 0;
       _products = [];
       _isLoading = true;
+      _isLoadingMore = false;
+      _isLastPage = false;
       _errorMessage = null;
       notifyListeners();
     } else {
-      if (_isLoadingMore || _isLastPage) return;
       _isLoadingMore = true;
       notifyListeners();
     }
@@ -129,7 +134,7 @@ class ProductProvider extends ChangeNotifier {
 
       _totalPages = pageResult.totalPages;
       _totalElements = pageResult.totalElements;
-      _isLastPage = pageResult.last;
+      _isLastPage = pageResult.last || pageResult.content.isEmpty;
       _currentPage++;
     } catch (e) {
       if (currentRequestId != _requestId) return;
@@ -137,6 +142,9 @@ class ProductProvider extends ChangeNotifier {
     } finally {
       if (currentRequestId == _requestId) {
         _isLoading = false;
+        _isLoadingMore = false;
+        notifyListeners();
+      } else if (!reset) {
         _isLoadingMore = false;
         notifyListeners();
       }

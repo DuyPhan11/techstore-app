@@ -31,8 +31,12 @@ class _ProductListScreenState extends State<ProductListScreen> {
     _searchController.text = provider.keyword;
 
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
-        provider.fetchProducts();
+      if (_scrollController.hasClients &&
+          _scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+        final p = Provider.of<ProductProvider>(context, listen: false);
+        if (p.hasMore && !p.isLoadingMore && !p.isLoading) {
+          p.fetchProducts(reset: false);
+        }
       }
     });
   }
@@ -786,33 +790,64 @@ class _ProductListScreenState extends State<ProductListScreen> {
                             provider.resetFilters();
                           },
                         )
-                      : GridView.builder(
+                      : CustomScrollView(
                           controller: _scrollController,
-                          padding: const EdgeInsets.all(16),
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: 0.68,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
-                          ),
-                          itemCount: provider.products.length + (provider.isLoadingMore ? 2 : 0),
-                          itemBuilder: (context, index) {
-                            if (index >= provider.products.length) {
-                              return const Center(child: CircularProgressIndicator());
-                            }
-                            final product = provider.products[index];
-                            return ProductCard(
-                              product: product,
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => ProductDetailScreen(productId: product.id),
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          slivers: [
+                            SliverPadding(
+                              padding: const EdgeInsets.all(16),
+                              sliver: SliverGrid(
+                                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  childAspectRatio: 0.68,
+                                  crossAxisSpacing: 12,
+                                  mainAxisSpacing: 12,
+                                ),
+                                delegate: SliverChildBuilderDelegate(
+                                  (context, index) {
+                                    final product = provider.products[index];
+                                    return ProductCard(
+                                      product: product,
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => ProductDetailScreen(productId: product.id),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                  childCount: provider.products.length,
+                                ),
+                              ),
+                            ),
+                            if (provider.isLoadingMore)
+                              const SliverToBoxAdapter(
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 24),
+                                  child: Center(
+                                    child: SizedBox(
+                                      width: 28,
+                                      height: 28,
+                                      child: CircularProgressIndicator(strokeWidth: 2.5),
+                                    ),
                                   ),
-                                );
-                              },
-                            );
-                          },
+                                ),
+                              ),
+                            if (!provider.hasMore && provider.products.isNotEmpty)
+                              SliverToBoxAdapter(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(bottom: 24, top: 4),
+                                  child: Center(
+                                    child: Text(
+                                      'Đã hiển thị tất cả ${provider.products.length} sản phẩm',
+                                      style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
             ),
           ),
