@@ -224,11 +224,33 @@ class _ProductCardState extends State<ProductCard> {
                                 }
                               : null,
                           child: Padding(
-                            padding: const EdgeInsets.all(6),
-                            child: Icon(
-                              Icons.add_shopping_cart,
-                              size: 16,
-                              color: product.isInStock ? AppColors.primary : AppColors.textLight,
+                            padding: const EdgeInsets.all(6.5),
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              alignment: Alignment.center,
+                              children: [
+                                Icon(
+                                  Icons.shopping_bag_outlined,
+                                  size: 16,
+                                  color: product.isInStock ? AppColors.primary : AppColors.textLight,
+                                ),
+                                Positioned(
+                                  top: -1,
+                                  right: -2,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(0.5),
+                                    decoration: BoxDecoration(
+                                      color: product.isInStock ? AppColors.primary : AppColors.textLight,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.add,
+                                      size: 7,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
