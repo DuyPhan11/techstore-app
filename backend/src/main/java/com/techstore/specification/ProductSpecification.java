@@ -21,10 +21,9 @@ public final class ProductSpecification {
                 String kw = "%" + params.getKeyword().trim().toLowerCase() + "%";
                 Predicate nameLike = cb.like(cb.lower(root.get("name")), kw);
                 Predicate skuLike = cb.like(cb.lower(root.get("sku")), kw);
-                Predicate descLike = cb.like(cb.lower(cb.coalesce(root.get("description"), "")), kw);
                 Predicate catLike = cb.like(cb.lower(root.get("category").get("name")), kw);
                 Predicate brandLike = cb.like(cb.lower(root.get("brand").get("name")), kw);
-                predicates.add(cb.or(nameLike, skuLike, descLike, catLike, brandLike));
+                predicates.add(cb.or(nameLike, skuLike, catLike, brandLike));
             }
 
             if (params.getCategoryId() != null) {

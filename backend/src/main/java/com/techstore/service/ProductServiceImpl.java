@@ -29,9 +29,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -172,13 +175,7 @@ public class ProductServiceImpl implements ProductService {
             }
         }
 
-        return resultProducts.stream()
-                .map(product -> {
-                    Integer stock = inventoryRepository.getTotalStockByProductId(product.getId());
-                    List<BranchStockDto> branchStocks = getBranchStocks(product.getId());
-                    return ProductSummaryDto.fromEntity(product, stock, branchStocks);
-                })
-                .collect(Collectors.toList());
+        return convertToSummaryDtos(resultProducts);
     }
 
     private PageResponse<ProductSummaryDto> listProducts(ProductFilterParams params, boolean management) {
@@ -210,13 +207,7 @@ public class ProductServiceImpl implements ProductService {
         Specification<Product> spec = ProductSpecification.filterBy(params);
         Page<Product> productPage = productRepository.findAll(spec, pageable);
 
-        List<ProductSummaryDto> content = productPage.getContent().stream()
-                .map(product -> {
-                    Integer stock = inventoryRepository.getTotalStockByProductId(product.getId());
-                    List<BranchStockDto> branchStocks = getBranchStocks(product.getId());
-                    return ProductSummaryDto.fromEntity(product, stock, branchStocks);
-                })
-                .collect(Collectors.toList());
+        List<ProductSummaryDto> content = convertToSummaryDtos(productPage.getContent());
 
         return PageResponse.<ProductSummaryDto>builder()
                 .content(content)
@@ -226,6 +217,71 @@ public class ProductServiceImpl implements ProductService {
                 .totalPages(productPage.getTotalPages())
                 .last(productPage.isLast())
                 .build();
+    }
+
+    private List<ProductSummaryDto> convertToSummaryDtos(List<Product> products) {
+        if (products == null || products.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Long> productIds = products.stream()
+                .map(Product::getId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+
+        if (productIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // 1. Bulk fetch all inventories with branches in 1 single query
+        List<Inventory> allInventories = inventoryRepository.findByProductIdInWithBranch(productIds);
+
+        // Group total stock by product ID
+        Map<Long, Integer> stockMap = allInventories.stream()
+                .filter(inv -> inv.getProduct() != null && inv.getProduct().getId() != null)
+                .collect(Collectors.groupingBy(
+                        inv -> inv.getProduct().getId(),
+                        Collectors.summingInt(inv -> inv.getQuantity() != null ? inv.getQuantity() : 0)
+                ));
+
+        // Group branch stocks by product ID
+        Map<Long, List<BranchStockDto>> branchStockMap = allInventories.stream()
+                .filter(inv -> inv.getProduct() != null && inv.getProduct().getId() != null)
+                .collect(Collectors.groupingBy(
+                        inv -> inv.getProduct().getId(),
+                        Collectors.mapping(inv -> BranchStockDto.builder()
+                                        .branchId(inv.getBranch() != null ? inv.getBranch().getId() : null)
+                                        .branchName(inv.getBranch() != null ? inv.getBranch().getName() : null)
+                                        .branchAddress(inv.getBranch() != null ? inv.getBranch().getAddress() : null)
+                                        .quantity(inv.getQuantity() != null ? inv.getQuantity() : 0)
+                                        .build(),
+                                Collectors.toList()
+                        )
+                ));
+
+        // 2. Bulk fetch all product images in 1 single query
+        List<ProductImage> allImages = productImageRepository.findByProductIdInOrderByDisplayOrderAsc(productIds);
+        Map<Long, String> primaryImageMap = new HashMap<>();
+        for (ProductImage img : allImages) {
+            if (img.getProduct() == null || img.getProduct().getId() == null) continue;
+            Long pid = img.getProduct().getId();
+            if (Boolean.TRUE.equals(img.getIsPrimary())) {
+                primaryImageMap.put(pid, img.getImageUrl());
+            } else if (!primaryImageMap.containsKey(pid)) {
+                primaryImageMap.put(pid, img.getImageUrl());
+            }
+        }
+
+        // 3. Map to DTOs in memory (0 extra queries)
+        return products.stream()
+                .map(product -> {
+                    Integer stock = stockMap.getOrDefault(product.getId(), 0);
+                    List<BranchStockDto> branchStocks = branchStockMap.getOrDefault(product.getId(), Collections.emptyList());
+                    String primaryImg = primaryImageMap.get(product.getId());
+                    return ProductSummaryDto.fromEntity(product, stock, branchStocks, primaryImg);
+                })
+                .collect(Collectors.toList());
     }
 
     private List<BranchStockDto> getBranchStocks(Long productId) {

@@ -27,6 +27,9 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long>, Jpa
 
     @Query("SELECT COALESCE(SUM(i.quantity), 0) FROM Inventory i WHERE i.product.id = :productId")
     Integer getTotalStockByProductId(@Param("productId") Long productId);
+
+    @Query("SELECT i FROM Inventory i JOIN FETCH i.branch JOIN FETCH i.product WHERE i.product.id IN :productIds")
+    List<Inventory> findByProductIdInWithBranch(@Param("productIds") List<Long> productIds);
 }
 
 

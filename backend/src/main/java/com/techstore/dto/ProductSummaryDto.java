@@ -36,16 +36,20 @@ public class ProductSummaryDto {
     private LocalDateTime createdAt;
 
     public static ProductSummaryDto fromEntity(Product product, Integer totalStock) {
-        return fromEntity(product, totalStock, null);
+        return fromEntity(product, totalStock, null, null);
     }
 
     public static ProductSummaryDto fromEntity(Product product, Integer totalStock, List<BranchStockDto> branchInventories) {
+        return fromEntity(product, totalStock, branchInventories, null);
+    }
+
+    public static ProductSummaryDto fromEntity(Product product, Integer totalStock, List<BranchStockDto> branchInventories, String primaryImageUrl) {
         if (product == null) {
             return null;
         }
 
-        String primaryImg = null;
-        if (product.getImages() != null && !product.getImages().isEmpty()) {
+        String primaryImg = primaryImageUrl;
+        if (primaryImg == null && product.getImages() != null && !product.getImages().isEmpty()) {
             primaryImg = product.getImages().stream()
                     .filter(img -> Boolean.TRUE.equals(img.getIsPrimary()))
                     .findFirst()
