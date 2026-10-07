@@ -50,6 +50,15 @@ public class EmailService {
     @Value("${resend.api-key:${RESEND_API_KEY:}}")
     private String resendApiKey;
 
+    @Value("${brevo.api-key:${BREVO_API_KEY:}}")
+    private String brevoApiKey;
+
+    @Value("${brevo.sender-email:${BREVO_SENDER_EMAIL:phankeduy112005@gmail.com}}")
+    private String brevoSenderEmail;
+
+    @Value("${brevo.sender-name:${BREVO_SENDER_NAME:TechStore}}")
+    private String brevoSenderName;
+
     private String resolveResendApiKey() {
         if (resendApiKey != null && !resendApiKey.isBlank()) {
             return resendApiKey.trim();
@@ -61,16 +70,33 @@ public class EmailService {
         return System.getProperty("RESEND_API_KEY");
     }
 
+    private String resolveBrevoApiKey() {
+        if (brevoApiKey != null && !brevoApiKey.isBlank()) {
+            return brevoApiKey.trim();
+        }
+        String envKey = System.getenv("BREVO_API_KEY");
+        if (envKey != null && !envKey.isBlank()) {
+            return envKey.trim();
+        }
+        return System.getProperty("BREVO_API_KEY");
+    }
+
     private void sendHtmlMail(String toEmail, String subject, String htmlContent, String otpCode) {
         boolean sent = false;
+        String brevoKey = resolveBrevoApiKey();
         String resendKey = resolveResendApiKey();
 
-        // 1. Nếu có cấu hình RESEND_API_KEY, thử gửi qua Resend HTTPS port 443 trước (siêu nhanh, không bị chặn)
-        if (resendKey != null && !resendKey.isBlank()) {
+        // 1. Ưu tiên hàng đầu: Brevo HTTPS API (Cổng 443 - gửi được cho MỌI EMAIL không cần tên miền)
+        if (brevoKey != null && !brevoKey.isBlank()) {
+            sent = trySendViaBrevo(brevoKey, toEmail, subject, htmlContent);
+        }
+
+        // 2. Dự phòng: Resend HTTPS API (Cổng 443)
+        if (!sent && resendKey != null && !resendKey.isBlank()) {
             sent = trySendViaResend(resendKey, toEmail, subject, htmlContent);
         }
 
-        // 2. Nếu chưa gửi được và không có Resend, thử qua SMTP Gmail (hoạt động tốt ở local)
+        // 3. Nếu chưa gửi được và chạy ở Local, thử qua Google SMTP (Cổng 587)
         if (!sent) {
             try {
                 MimeMessage message = mailSender.createMimeMessage();
@@ -89,7 +115,7 @@ public class EmailService {
             }
         }
 
-        // 3. Fallback an toàn: Ghi mã OTP to rõ vào console log để không làm nghẽn luồng đăng ký
+        // 4. Fallback an toàn: Ghi mã OTP to rõ vào console log để không làm nghẽn luồng đăng ký
         log.info("\n"
                 + "=================================================================\n"
                 + "⚡ [TECHSTORE OTP NOTIFICATION]\n"
@@ -97,7 +123,43 @@ public class EmailService {
                 + "🔑 MÃ OTP XÁC THỰC (Hiệu lực 10 phút): {}\n"
                 + "ℹ️ Trạng thái gửi mail thật: {}\n"
                 + "=================================================================",
-                toEmail, otpCode, sent ? "THÀNH CÔNG" : "CỔNG 587 BỊ CHẶN TRÊN RENDER FREE - LẤY MÃ TẠI ĐÂY");
+                toEmail, otpCode, sent ? "THÀNH CÔNG" : "LẤY MÃ TRỰC TIẾP TẠI ĐÂY");
+    }
+
+    private boolean trySendViaBrevo(String apiKey, String toEmail, String subject, String htmlContent) {
+        try {
+            log.info("Đang gửi email xác thực qua Brevo HTTPS API tới: {}...", toEmail);
+            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+            headers.set("api-key", apiKey);
+            headers.set("Accept", "application/json");
+
+            String senderEmail = (brevoSenderEmail != null && !brevoSenderEmail.isBlank())
+                    ? brevoSenderEmail.trim()
+                    : "phankeduy112005@gmail.com";
+            String senderName = (brevoSenderName != null && !brevoSenderName.isBlank())
+                    ? brevoSenderName.trim()
+                    : "TechStore";
+
+            java.util.Map<String, Object> body = java.util.Map.of(
+                    "sender", java.util.Map.of("name", senderName, "email", senderEmail),
+                    "to", java.util.List.of(java.util.Map.of("email", toEmail)),
+                    "subject", subject,
+                    "htmlContent", htmlContent
+            );
+
+            org.springframework.http.HttpEntity<java.util.Map<String, Object>> entity = new org.springframework.http.HttpEntity<>(body, headers);
+            org.springframework.http.ResponseEntity<String> res = restTemplate.postForEntity("https://api.brevo.com/v3/smtp/email", entity, String.class);
+            log.info("Đã gửi email xác thực thành công qua Brevo HTTPS tới: {} (Response: {})", toEmail, res.getBody());
+            return true;
+        } catch (org.springframework.web.client.HttpStatusCodeException ex) {
+            log.warn("Brevo API phản hồi lỗi (HTTP {}): {}", ex.getStatusCode(), ex.getResponseBodyAsString());
+            return false;
+        } catch (Exception e) {
+            log.warn("Gửi mail qua Brevo thất bại: {}", e.getMessage());
+            return false;
+        }
     }
 
     private boolean trySendViaResend(String apiKey, String toEmail, String subject, String htmlContent) {
