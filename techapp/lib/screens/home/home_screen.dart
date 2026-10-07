@@ -20,6 +20,7 @@ import '../../services/banner_service.dart';
 import '../../widgets/promo_banner_card.dart';
 import '../coupon/customer_coupons_screen.dart';
 import '../chat/ai_chat_screen.dart';
+import '../../widgets/ai_sparkles_icon.dart';
 import '../../utils/toast_helper.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -252,15 +253,12 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: const Color(0xFFF9FAFC),
       floatingActionButton: Container(
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [AppColors.cyberPurple, AppColors.primary],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: Colors.white,
           borderRadius: BorderRadius.circular(28),
+          border: Border.all(color: const Color(0xFFBAE6FD), width: 1.2),
           boxShadow: [
             BoxShadow(
-              color: AppColors.cyberPurple.withOpacity(0.4),
+              color: const Color(0xFF0284C7).withValues(alpha: 0.18),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -281,12 +279,12 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.smart_toy_rounded, color: Colors.white, size: 20),
+                  AiSparklesIcon(size: 20),
                   SizedBox(width: 6),
                   Text(
                     'TechBot AI',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: Color(0xFF0284C7),
                       fontWeight: FontWeight.bold,
                       fontSize: 12.5,
                     ),
@@ -538,20 +536,17 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    // Circular AI TechBot Assistant Button
+                    // Circular AI TechBot Assistant Button (Blue Stars Icon)
                     Container(
                       width: 46,
                       height: 46,
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [AppColors.cyberPurple, AppColors.primary],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
+                        color: Colors.white,
                         shape: BoxShape.circle,
+                        border: Border.all(color: const Color(0xFFE5E7EB)),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.cyberPurple.withOpacity(0.3),
+                            color: const Color(0xFF0284C7).withValues(alpha: 0.12),
                             blurRadius: 6,
                             offset: const Offset(0, 2),
                           ),
@@ -559,7 +554,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       child: IconButton(
                         padding: EdgeInsets.zero,
-                        icon: const Icon(Icons.smart_toy_rounded, color: Colors.white, size: 21),
+                        icon: const AiSparklesIcon(size: 21),
                         tooltip: 'TechBot AI Tư vấn',
                         onPressed: () {
                           Navigator.push(
@@ -746,40 +741,6 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                           ),
-                          if (!isFiltered && _hasViewedHistory) ...[
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
-                                ),
-                                borderRadius: BorderRadius.circular(10),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: const Color(0xFF6366F1).withValues(alpha: 0.3),
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: const Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.auto_awesome, size: 11, color: Colors.amberAccent),
-                                  SizedBox(width: 3),
-                                  Text(
-                                    'Gợi ý',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
                         ],
                       ),
                     ),

@@ -18,6 +18,7 @@ import '../../widgets/safe_network_image.dart';
 import '../cart/cart_screen.dart';
 import '../checkout/checkout_screen.dart';
 import '../chat/ai_chat_screen.dart';
+import '../../widgets/ai_sparkles_icon.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final int productId;
@@ -512,24 +513,30 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              AppColors.cyberPurple.withOpacity(0.08),
-                              AppColors.primary.withOpacity(0.08),
+                              const Color(0xFF0284C7).withValues(alpha: 0.08),
+                              const Color(0xFF2563EB).withValues(alpha: 0.08),
                             ],
                           ),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.cyberPurple.withOpacity(0.2)),
+                          border: Border.all(color: const Color(0xFFBAE6FD)),
                         ),
                         child: Row(
                           children: [
                             Container(
                               padding: const EdgeInsets.all(6),
                               decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [AppColors.cyberPurple, AppColors.primary],
-                                ),
+                                color: Colors.white,
                                 borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: const Color(0xFFE0F2FE)),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFF0284C7).withValues(alpha: 0.1),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 1),
+                                  ),
+                                ],
                               ),
-                              child: const Icon(Icons.smart_toy_rounded, size: 16, color: Colors.white),
+                              child: const AiSparklesIcon(size: 16),
                             ),
                             const SizedBox(width: 10),
                             Expanded(
@@ -547,7 +554,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                         ),
                                       ),
                                       const SizedBox(width: 4),
-                                      const Icon(Icons.auto_awesome, size: 12, color: Color(0xFF8E2DE2)),
+                                      const AiSparklesIcon(size: 13),
                                     ],
                                   ),
                                   const Text(
@@ -557,7 +564,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 ],
                               ),
                             ),
-                            const Icon(Icons.arrow_forward_ios_rounded, size: 13, color: AppColors.cyberPurple),
+                            const Icon(Icons.arrow_forward_ios_rounded, size: 13, color: Color(0xFF0284C7)),
                           ],
                         ),
                       ),

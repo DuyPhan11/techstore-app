@@ -7,6 +7,7 @@ import '../../models/ai_chat_model.dart';
 import '../../models/product_model.dart';
 import '../../services/ai_chat_service.dart';
 import '../product/product_detail_screen.dart';
+import '../../widgets/ai_sparkles_icon.dart';
 
 class AiChatScreen extends StatefulWidget {
   final String? initialPrompt;
@@ -241,24 +242,19 @@ class _AiChatScreenState extends State<AiChatScreen> {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [AppColors.cyberPurple, AppColors.primary],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: const Color(0xFFBAE6FD)),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.cyberPurple.withValues(alpha: 0.3),
+                      color: const Color(0xFF0284C7).withValues(alpha: 0.15),
                       blurRadius: 8,
                       offset: const Offset(0, 3),
                     ),
                   ],
                 ),
-                child: const Icon(
-                  Icons.smart_toy_rounded,
-                  color: Colors.white,
-                  size: 22,
+                child: const Center(
+                  child: AiSparklesIcon(size: 22),
                 ),
               ),
               Positioned(
@@ -297,7 +293,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [Color(0xFF8E2DE2), Color(0xFF4A00E0)],
+                          colors: [Color(0xFF0284C7), Color(0xFF2563EB)],
                         ),
                         borderRadius: BorderRadius.circular(6),
                       ),
@@ -401,13 +397,19 @@ class _AiChatScreenState extends State<AiChatScreen> {
                 height: 32,
                 margin: const EdgeInsets.only(top: 2, right: 8),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryLight,
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0xFFBAE6FD)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF0284C7).withValues(alpha: 0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
                 ),
-                child: const Icon(
-                  Icons.smart_toy_outlined,
-                  size: 18,
-                  color: AppColors.primary,
+                child: const Center(
+                  child: AiSparklesIcon(size: 18),
                 ),
               ),
               Expanded(
@@ -438,17 +440,17 @@ class _AiChatScreenState extends State<AiChatScreen> {
                         children: [
                           Row(
                             children: [
-                              Text(
+                              const Text(
                                 'TechBot',
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
-                                  color: AppColors.cyberPurple,
+                                  color: Color(0xFF0284C7),
                                 ),
                               ),
                               if (message.fromAi) ...[
                                 const SizedBox(width: 4),
-                                const Icon(Icons.auto_awesome, size: 12, color: Color(0xFF8E2DE2)),
+                                const AiSparklesIcon(size: 12),
                               ],
                             ],
                           ),
@@ -748,13 +750,19 @@ class _AiChatScreenState extends State<AiChatScreen> {
             height: 32,
             margin: const EdgeInsets.only(right: 8),
             decoration: BoxDecoration(
-              color: AppColors.primaryLight,
+              color: Colors.white,
               borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: const Color(0xFFBAE6FD)),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF0284C7).withValues(alpha: 0.1),
+                  blurRadius: 4,
+                  offset: const Offset(0, 1),
+                ),
+              ],
             ),
-            child: const Icon(
-              Icons.smart_toy_outlined,
-              size: 18,
-              color: AppColors.primary,
+            child: const Center(
+              child: AiSparklesIcon(size: 18),
             ),
           ),
           Container(
