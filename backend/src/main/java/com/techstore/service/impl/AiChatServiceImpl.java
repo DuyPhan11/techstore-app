@@ -453,7 +453,7 @@ public class AiChatServiceImpl implements AiChatService {
         sb.append("CHÍNH SÁCH CỬA HÀNG TECHSTORE:\n");
         sb.append("1. ĐỔI TRẢ & HOÀN TIỀN: 1 đổi 1 hoặc hoàn tiền trong vòng 7 NGÀY kể từ ngày nhận hàng thành công nếu máy bị lỗi phần cứng do nhà sản xuất. Khách có thể gửi yêu cầu trực tuyến ngay trong chi tiết đơn hàng trên app.\n");
         sb.append("2. BẢO HÀNH CHÍNH HÃNG: 100% sản phẩm chính hãng, thời hạn bảo hành 12 - 24 tháng theo hãng. Khách hàng chỉ cần xuất Hóa đơn điện tử PDF từ app để bảo hành tại mọi trung tâm ủy quyền toàn quốc (Apple, Asus, Samsung, v.v.).\n");
-        sb.append("3. GIAO HÀNG: Miễn phí vận chuyển toàn quốc cho đơn hàng từ 500.000 VNĐ. Thời gian giao hàng 2 - 4 ngày.\n");
+        sb.append("3. GIAO HÀNG: Miễn phí vận chuyển toàn quốc cho đơn hàng từ 5.000.000 VNĐ hoặc khi khách chọn Nhận tại cửa hàng. Đơn dưới 5 triệu có phí giao hàng tiêu chuẩn là 30.000 VNĐ. Thời gian giao hàng 2 - 4 ngày.\n");
         sb.append("4. THANH TOÁN: Hỗ trợ tiền mặt khi nhận hàng (COD), ví điện tử VNPay, chuyển khoản ngân hàng và thẻ quốc tế.\n\n");
 
         if (products != null && !products.isEmpty()) {
@@ -503,7 +503,8 @@ public class AiChatServiceImpl implements AiChatService {
             quickReplies.add("Phương thức thanh toán");
         } else if (norm.contains("giao hang") || norm.contains("ship") || norm.contains("van chuyen") || norm.contains("phi")) {
             reply.append("Dạ về chính sách giao hàng tại TechStore:\n\n");
-            reply.append("🚚 **Miễn phí vận chuyển (Freeship):** Áp dụng cho mọi đơn hàng từ **500.000 VNĐ** trên toàn quốc.\n");
+            reply.append("🚚 **Miễn phí vận chuyển (Freeship):** Áp dụng cho mọi đơn hàng từ **5.000.000 VNĐ** trên toàn quốc hoặc khi chọn **Nhận tại cửa hàng**.\n");
+            reply.append("📦 Đơn hàng dưới 5 triệu có phí giao hàng tiêu chuẩn là 30.000 VNĐ.\n");
             reply.append("⏱️ **Thời gian nhận hàng:**\n");
             reply.append("  - Nội thành: 1 - 2 ngày làm việc.\n");
             reply.append("  - Các tỉnh thành khác: 2 - 4 ngày làm việc.\n");
@@ -581,7 +582,7 @@ public class AiChatServiceImpl implements AiChatService {
             reply.append("Em có thể hỗ trợ bạn:\n");
             reply.append("💡 **Tư vấn chọn thiết bị:** Điện thoại thông minh, laptop văn phòng/gaming, tablet, loa & tai nghe theo ngân sách.\n");
             reply.append("🛡️ **Chính sách:** Đổi trả trong 7 ngày, bảo hành 12 - 24 tháng chính hãng và xuất hóa đơn PDF.\n");
-            reply.append("🚚 **Hỗ trợ mua sắm:** Miễn phí vận chuyển từ 500k, thanh toán COD hoặc VNPay tiện lợi.\n\n");
+            reply.append("🚚 **Hỗ trợ mua sắm:** Miễn phí vận chuyển đơn từ 5 triệu (hoặc nhận tại cửa hàng), thanh toán COD hoặc VNPay tiện lợi.\n\n");
             reply.append("Bạn đang quan tâm đến dòng sản phẩm nào hoặc cần tư vấn tầm giá bao nhiêu ạ?");
 
             quickReplies.add("Điện thoại giá rẻ dưới 5tr");

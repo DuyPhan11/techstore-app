@@ -59,7 +59,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
             'Em có thể hỗ trợ bạn:\n'
             '• 🔍 **Tìm kiếm & tư vấn cấu hình** máy tính, laptop, điện thoại theo ngân sách.\n'
             '• 🛡️ **Giải đáp chính sách:** Đổi trả 7 ngày trên app & bảo hành 12 tháng chính hãng.\n'
-            '• ⚡ **Hỗ trợ thanh toán:** COD, VNPay, miễn phí vận chuyển từ 500k.\n\n'
+            '• ⚡ **Hỗ trợ thanh toán:** COD, VNPay, miễn phí vận chuyển đơn từ 5 triệu (hoặc nhận tại cửa hàng).\n\n'
             'Bạn đang quan tâm đến sản phẩm nào hôm nay ạ?',
         isUser: false,
         timestamp: DateTime.now(),

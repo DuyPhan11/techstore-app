@@ -151,23 +151,25 @@ class _ProductCardState extends State<ProductCard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Free Shipping Tag
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: AppColors.freeShippingBg,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: const Text(
-                      'Miễn phí vận chuyển',
-                      style: TextStyle(
-                        color: AppColors.freeShipping,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
+                  // Free Shipping Tag (Chỉ hiển thị cho sản phẩm từ 5.000.000 ₫ trở lên)
+                  if (product.price >= 5000000) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: AppColors.freeShippingBg,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: const Text(
+                        'Miễn phí vận chuyển',
+                        style: TextStyle(
+                          color: AppColors.freeShipping,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 6),
+                    const SizedBox(height: 6),
+                  ],
 
                   // Name
                   Text(
