@@ -440,12 +440,12 @@ class _AiChatScreenState extends State<AiChatScreen> {
                         children: [
                           Row(
                             children: [
-                              const Text(
-                                'TechBot',
+                              Text(
+                                message.fromAi ? 'TechBot (Gemini AI)' : 'TechBot (Hệ thống)',
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFF0284C7),
+                                  color: message.fromAi ? const Color(0xFF7C3AED) : const Color(0xFF0284C7),
                                 ),
                               ),
                               if (message.fromAi) ...[

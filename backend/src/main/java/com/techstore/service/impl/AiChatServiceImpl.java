@@ -39,7 +39,7 @@ public class AiChatServiceImpl implements AiChatService {
     @Value("${gemini.api-key:}")
     private String geminiApiKey;
 
-    @Value("${gemini.model:gemini-3.5-flash-lite}")
+    @Value("${gemini.model:gemini-1.5-flash}")
     private String geminiModel;
 
     private final RestTemplate restTemplate = createRestTemplate();
@@ -356,10 +356,9 @@ public class AiChatServiceImpl implements AiChatService {
         if (geminiModel != null && !geminiModel.isBlank()) {
             modelsToTry.add(geminiModel.trim());
         }
-        if (!modelsToTry.contains("gemini-3.5-flash-lite")) modelsToTry.add("gemini-3.5-flash-lite");
-        if (!modelsToTry.contains("gemini-3.1-flash-lite-preview")) modelsToTry.add("gemini-3.1-flash-lite-preview");
-        if (!modelsToTry.contains("gemini-flash-latest")) modelsToTry.add("gemini-flash-latest");
-        if (!modelsToTry.contains("gemma-4-26b-a4b-it")) modelsToTry.add("gemma-4-26b-a4b-it");
+        if (!modelsToTry.contains("gemini-1.5-flash")) modelsToTry.add("gemini-1.5-flash");
+        if (!modelsToTry.contains("gemini-2.0-flash")) modelsToTry.add("gemini-2.0-flash");
+        if (!modelsToTry.contains("gemini-1.5-pro")) modelsToTry.add("gemini-1.5-pro");
 
         String systemInstruction = buildSystemPrompt(catalogProducts);
 
