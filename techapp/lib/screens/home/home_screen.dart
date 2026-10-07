@@ -320,94 +320,34 @@ class _HomeScreenState extends State<HomeScreen> {
                 Row(
                   children: [
                     Expanded(
-                      child: Container(
-                        height: 46,
-                        padding: const EdgeInsets.only(left: 14, right: 6),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(24),
-                          border: Border.all(color: const Color(0xFFE5E7EB)),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.02),
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                _debounce?.cancel();
-                                productProvider.setKeyword(_searchController.text.trim());
-                                if (_searchController.text.trim().isNotEmpty) {
-                                  widget.onTabChange(1);
-                                }
-                              },
-                              child: const Icon(Icons.search, color: AppColors.textMuted, size: 20),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: TextField(
-                                controller: _searchController,
-                                textInputAction: TextInputAction.search,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  color: AppColors.textDark,
-                                ),
-                                decoration: const InputDecoration(
-                                  hintText: 'Tìm kiếm điện thoại, laptop, thương hiệu...',
-                                  hintStyle: TextStyle(
-                                    color: AppColors.textMuted,
-                                    fontSize: 13,
-                                  ),
-                                  border: InputBorder.none,
-                                  enabledBorder: InputBorder.none,
-                                  focusedBorder: InputBorder.none,
-                                  isDense: true,
-                                  contentPadding: EdgeInsets.symmetric(vertical: 10),
-                                ),
-                                onChanged: (value) {
-                                  _debounce?.cancel();
-                                  _debounce = Timer(const Duration(milliseconds: 350), () {
-                                    if (mounted) {
-                                      productProvider.setKeyword(value.trim());
-                                    }
-                                  });
-                                  setState(() {});
-                                },
-                                onSubmitted: (value) {
-                                  _debounce?.cancel();
-                                  productProvider.setKeyword(value.trim());
-                                  if (value.trim().isNotEmpty) {
-                                    widget.onTabChange(1);
-                                  }
-                                },
-                              ),
-                            ),
-                            if (_searchController.text.isNotEmpty)
-                              GestureDetector(
-                                onTap: () {
-                                  _debounce?.cancel();
-                                  _searchController.clear();
-                                  productProvider.setKeyword('');
-                                  setState(() {});
-                                },
-                                child: const Padding(
-                                  padding: EdgeInsets.all(6),
-                                  child: Icon(Icons.cancel, color: AppColors.textMuted, size: 18),
-                                ),
-                              )
-                            else
-                              GestureDetector(
-                                onTap: () => widget.onTabChange(1),
-                                child: const Padding(
-                                  padding: EdgeInsets.all(6),
-                                  child: Icon(Icons.tune, color: AppColors.textMuted, size: 18),
-                                ),
-                              ),
-                          ],
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          productProvider.requestSearchFocus();
+                          widget.onTabChange(1);
+                        },
+                        child: TextField(
+                          controller: _searchController,
+                          readOnly: true,
+                          onTap: () {
+                            productProvider.requestSearchFocus();
+                            widget.onTabChange(1);
+                          },
+                          decoration: InputDecoration(
+                            hintText: 'Tìm kiếm sản phẩm, thương hiệu...',
+                            prefixIcon: const Icon(Icons.search, size: 20),
+                            suffixIcon: _searchController.text.isNotEmpty
+                                ? IconButton(
+                                    icon: const Icon(Icons.clear, size: 18),
+                                    onPressed: () {
+                                      _searchController.clear();
+                                      productProvider.setKeyword('');
+                                      setState(() {});
+                                    },
+                                  )
+                                : null,
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          ),
                         ),
                       ),
                     ),

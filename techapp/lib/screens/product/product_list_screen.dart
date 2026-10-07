@@ -21,6 +21,7 @@ class ProductListScreen extends StatefulWidget {
 class _ProductListScreenState extends State<ProductListScreen> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  final FocusNode _searchFocusNode = FocusNode();
   Timer? _debounce;
 
   @override
@@ -41,6 +42,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
     _debounce?.cancel();
     _searchController.dispose();
     _scrollController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -573,6 +575,15 @@ class _ProductListScreenState extends State<ProductListScreen> {
   Widget build(BuildContext context) {
     final provider = Provider.of<ProductProvider>(context);
 
+    if (provider.shouldFocusSearch) {
+      provider.consumeSearchFocus();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _searchFocusNode.requestFocus();
+        }
+      });
+    }
+
     if (_searchController.text != provider.keyword && !FocusScope.of(context).hasFocus) {
       _searchController.text = provider.keyword;
     }
@@ -589,6 +600,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 Expanded(
                   child: TextField(
                     controller: _searchController,
+                    focusNode: _searchFocusNode,
                     textInputAction: TextInputAction.search,
                     decoration: InputDecoration(
                       hintText: 'Tìm kiếm sản phẩm, thương hiệu...',

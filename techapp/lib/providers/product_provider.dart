@@ -49,6 +49,18 @@ class ProductProvider extends ChangeNotifier {
   String get sortBy => _sortBy;
   String get sortDir => _sortDir;
 
+  bool _shouldFocusSearch = false;
+  bool get shouldFocusSearch => _shouldFocusSearch;
+
+  void requestSearchFocus() {
+    _shouldFocusSearch = true;
+    notifyListeners();
+  }
+
+  void consumeSearchFocus() {
+    _shouldFocusSearch = false;
+  }
+
   bool get hasActiveFilters =>
       _keyword.isNotEmpty ||
       _selectedCategoryId != null ||
