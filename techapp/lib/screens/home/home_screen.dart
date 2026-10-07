@@ -435,7 +435,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           IconButton(
                             padding: EdgeInsets.zero,
-                            icon: const Icon(Icons.shopping_cart_outlined, color: AppColors.textDark, size: 21),
+                            icon: const Icon(Icons.shopping_bag_outlined, color: AppColors.textDark, size: 21),
                             tooltip: 'Giỏ hàng',
                             onPressed: () {
                               Navigator.push(

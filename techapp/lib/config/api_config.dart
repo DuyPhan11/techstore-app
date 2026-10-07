@@ -20,7 +20,7 @@ class ApiConfig {
 
   /// Chuyển thành true nếu muốn trỏ về Backend máy tính (Localhost / Android 10.0.2.2),
   /// Chuyển thành false nếu muốn trỏ về Backend Render trên đám mây.
-  static const bool useLocalBackend = true;
+  static const bool useLocalBackend = false;
 
   /// Tự động chọn URL mặc định dựa trên cấu hình và thiết bị
   static String get defaultBaseUrl {
