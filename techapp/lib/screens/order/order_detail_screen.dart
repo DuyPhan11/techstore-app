@@ -8,6 +8,7 @@ import '../../utils/currency_format.dart';
 import '../../utils/toast_helper.dart';
 import 'order_invoice_pdf_preview_screen.dart';
 import 'order_reviews_screen.dart';
+import '../product/product_detail_screen.dart';
 
 class OrderDetailScreen extends StatefulWidget {
   final int orderId;
@@ -688,54 +689,87 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 separatorBuilder: (_, _) => const Divider(height: 1, thickness: 0.8, color: AppColors.divider),
                 itemBuilder: (context, index) {
                   final item = order.items[index];
-                  return Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: 56,
-                          height: 56,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF9FAFB),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: AppColors.border),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: SafeNetworkImage(
-                              imageUrl: item.productImageUrl,
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                              height: double.infinity,
-                              fallbackIconSize: 24,
+                  return Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: item.productId > 0
+                          ? () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => ProductDetailScreen(productId: item.productId),
+                                ),
+                              );
+                            }
+                          : null,
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: 56,
+                              height: 56,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF9FAFB),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: AppColors.border),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: SafeNetworkImage(
+                                  imageUrl: item.productImageUrl,
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  fallbackIconSize: 24,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item.productName,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item.productName,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '${CurrencyHelper.format(item.unitPrice)} x ${item.quantity}',
+                                    style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '${CurrencyHelper.format(item.unitPrice)} x ${item.quantity}',
-                                style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
-                              ),
-                            ],
-                          ),
+                            ),
+                            const SizedBox(width: 8),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  CurrencyHelper.format(item.subtotal),
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textDark),
+                                ),
+                                const SizedBox(height: 6),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: const [
+                                    Text(
+                                      'Xem chi tiết',
+                                      style: TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w500),
+                                    ),
+                                    Icon(Icons.chevron_right, size: 14, color: AppColors.primary),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                        Text(
-                          CurrencyHelper.format(item.subtotal),
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textDark),
-                        ),
-                      ],
+                      ),
                     ),
                   );
                 },

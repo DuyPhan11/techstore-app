@@ -8,6 +8,7 @@ import '../../providers/favorite_provider.dart';
 import '../../providers/notification_provider.dart';
 import '../../providers/address_provider.dart';
 import '../../utils/toast_helper.dart';
+import '../../widgets/google_logo_icon.dart';
 import 'register_screen.dart';
 import 'forgot_password_screen.dart';
 import 'verify_otp_screen.dart';
@@ -138,7 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: AppColors.primaryLight.withOpacity(0.5),
+                        color: AppColors.primaryLight.withValues(alpha: 0.5),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(Icons.lock_person_outlined, size: 48, color: AppColors.primary),
@@ -276,12 +277,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Image.network(
-                              'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/48px-Google_%22G%22_logo.svg.png',
-                              width: 22,
-                              height: 22,
-                              errorBuilder: (_, __, ___) => const Icon(Icons.g_mobiledata, color: Colors.red, size: 24),
-                            ),
+                            const GoogleLogoIcon(size: 22),
                             const SizedBox(width: 12),
                             const Text(
                               'Tiếp tục với Google',

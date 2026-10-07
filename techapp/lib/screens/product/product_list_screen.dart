@@ -746,7 +746,9 @@ class _ProductListScreenState extends State<ProductListScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Tìm thấy ${provider.totalElements} sản phẩm',
+                  provider.isLoading
+                      ? 'Đang tìm kiếm...'
+                      : 'Tìm thấy ${provider.totalElements} sản phẩm',
                   style: const TextStyle(fontSize: 13, color: AppColors.textMuted, fontWeight: FontWeight.w500),
                 ),
               ],
@@ -759,8 +761,20 @@ class _ProductListScreenState extends State<ProductListScreen> {
               onRefresh: () async {
                 await provider.fetchProducts(reset: true);
               },
-              child: provider.isLoading && provider.products.isEmpty
-                  ? const Center(child: CircularProgressIndicator())
+              child: provider.isLoading
+                  ? const Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 40),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CircularProgressIndicator(),
+                            SizedBox(height: 12),
+                            Text('Đang tải sản phẩm...', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
+                          ],
+                        ),
+                      ),
+                    )
                   : provider.products.isEmpty
                       ? EmptyStateWidget(
                           icon: Icons.search_off,

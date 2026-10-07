@@ -12,6 +12,20 @@ class OrderProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
+  List<OrderItemModel> get purchasedProducts {
+    final Map<int, OrderItemModel> uniqueProducts = {};
+    for (final order in _orders) {
+      if (order.status != 'CANCELLED') {
+        for (final item in order.items) {
+          if (item.productId > 0 && !uniqueProducts.containsKey(item.productId)) {
+            uniqueProducts[item.productId] = item;
+          }
+        }
+      }
+    }
+    return uniqueProducts.values.toList();
+  }
+
   Future<void> fetchOrders({bool silent = false}) async {
     final token = await ApiService.getToken();
     if (token == null || token.isEmpty) {

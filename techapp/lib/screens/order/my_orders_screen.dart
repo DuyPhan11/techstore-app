@@ -84,8 +84,6 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with SingleTickerProvid
       );
     }
 
-    final filteredOrders = orderProvider.filterOrders(_tabController.index);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Đơn mua của tôi'),
@@ -106,63 +104,79 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with SingleTickerProvid
           tabs: _tabs.map((t) => Tab(text: t)).toList(),
         ),
       ),
-      body: RefreshIndicator(
-        onRefresh: () => orderProvider.fetchOrders(),
-        child: orderProvider.isLoading && orderProvider.orders.isEmpty
-            ? const Center(child: CircularProgressIndicator())
-            : orderProvider.errorMessage != null && orderProvider.orders.isEmpty
-                ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.error_outline, size: 48, color: AppColors.danger),
-                          const SizedBox(height: 12),
-                          Text(
-                            orderProvider.errorMessage!,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(color: AppColors.textDark),
-                          ),
-                          const SizedBox(height: 16),
-                          ElevatedButton(
-                            onPressed: () => orderProvider.fetchOrders(),
-                            child: const Text('Thử lại'),
-                          ),
-                        ],
-                      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: List.generate(_tabs.length, (tabIndex) {
+          final filteredOrders = orderProvider.filterOrders(tabIndex);
+
+          if (orderProvider.isLoading && orderProvider.orders.isEmpty) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (orderProvider.errorMessage != null && orderProvider.orders.isEmpty) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline, size: 48, color: AppColors.danger),
+                    const SizedBox(height: 12),
+                    Text(
+                      orderProvider.errorMessage!,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: AppColors.textDark),
                     ),
-                  )
-                : filteredOrders.isEmpty
-                    ? ListView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        children: [
-                          SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.6,
-                            child: EmptyStateWidget(
-                              icon: Icons.receipt_long_outlined,
-                              title: 'Chưa có đơn hàng nào',
-                              subtitle: _tabController.index == 0
-                                  ? 'Bạn chưa có đơn mua nào. Hãy mua sắm ngay để trải nghiệm dịch vụ!'
-                                  : 'Không tìm thấy đơn hàng nào ở mục này.',
-                              buttonText: 'Khám phá sản phẩm',
-                              onButtonPressed: () {
-                                Navigator.popUntil(context, (route) => route.isFirst);
-                              },
-                            ),
-                          ),
-                        ],
-                      )
-                    : ListView.separated(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        padding: const EdgeInsets.all(16),
-                        itemCount: filteredOrders.length,
-                        separatorBuilder: (_, _) => const SizedBox(height: 12),
-                        itemBuilder: (context, index) {
-                          final order = filteredOrders[index];
-                          return _buildOrderCard(order, orderProvider);
-                        },
-                      ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () => orderProvider.fetchOrders(),
+                      child: const Text('Thử lại'),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          if (filteredOrders.isEmpty) {
+            return RefreshIndicator(
+              onRefresh: () => orderProvider.fetchOrders(),
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.6,
+                    child: EmptyStateWidget(
+                      icon: Icons.receipt_long_outlined,
+                      title: 'Chưa có đơn hàng nào',
+                      subtitle: tabIndex == 0
+                          ? 'Bạn chưa có đơn mua nào. Hãy mua sắm ngay để trải nghiệm dịch vụ!'
+                          : 'Không tìm thấy đơn hàng nào ở mục này.',
+                      buttonText: 'Khám phá sản phẩm',
+                      onButtonPressed: () {
+                        Navigator.popUntil(context, (route) => route.isFirst);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return RefreshIndicator(
+            onRefresh: () => orderProvider.fetchOrders(),
+            child: ListView.separated(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(16),
+              itemCount: filteredOrders.length,
+              separatorBuilder: (_, _) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final order = filteredOrders[index];
+                return _buildOrderCard(order, orderProvider);
+              },
+            ),
+          );
+        }),
       ),
     );
   }
@@ -204,7 +218,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with SingleTickerProvid
                   'Mã: ${order.orderCode}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.primary),
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textDark),
                 ),
               ),
               const SizedBox(width: 8),
@@ -333,31 +347,33 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with SingleTickerProvid
           ],
 
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Tổng thanh toán:', style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
-                  Text(
-                    CurrencyHelper.format(order.finalAmount),
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.danger),
-                  ),
-                  const Text(
-                    'Đã gồm VAT & phí vận chuyển',
-                    style: TextStyle(fontSize: 10, color: AppColors.textLight),
-                  ),
-                ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Tổng thanh toán:', style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                    Text(
+                      CurrencyHelper.format(order.finalAmount),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.danger),
+                    ),
+                    const Text(
+                      'Đã gồm VAT & phí vận chuyển',
+                      style: TextStyle(fontSize: 10, color: AppColors.textLight),
+                    ),
+                  ],
+                ),
               ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
+              const SizedBox(width: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 6,
+                alignment: WrapAlignment.end,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  if (order.canExportInvoice) ...[
-                    IconButton(
-                      icon: const Icon(Icons.picture_as_pdf_outlined, size: 20, color: AppColors.primary),
-                      tooltip: 'Hóa đơn PDF',
-                      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                      padding: EdgeInsets.zero,
+                  if (order.canExportInvoice)
+                    OutlinedButton.icon(
                       onPressed: () {
                         Navigator.push(
                           context,
@@ -366,9 +382,17 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with SingleTickerProvid
                           ),
                         );
                       },
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                        side: const BorderSide(color: Color(0xFFE2E8F0)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      ),
+                      icon: const Icon(Icons.receipt_long_outlined, size: 14, color: AppColors.primary),
+                      label: const Text(
+                        'Xem hóa đơn',
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textDark),
+                      ),
                     ),
-                    const SizedBox(width: 6),
-                  ],
                   OutlinedButton(
                     onPressed: () async {
                       await Navigator.push(
@@ -380,10 +404,14 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with SingleTickerProvid
                       orderProvider.fetchOrders(silent: true);
                     },
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                      textStyle: const TextStyle(fontSize: 13),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                      side: const BorderSide(color: Color(0xFFE2E8F0)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                     ),
-                    child: const Text('Xem chi tiết'),
+                    child: const Text(
+                      'Xem chi tiết',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textDark),
+                    ),
                   ),
                 ],
               ),

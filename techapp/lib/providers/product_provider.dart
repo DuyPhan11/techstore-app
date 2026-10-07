@@ -90,9 +90,13 @@ class ProductProvider extends ChangeNotifier {
     } catch (_) {}
   }
 
+  int _requestId = 0;
+
   Future<void> fetchProducts({bool reset = false}) async {
+    final currentRequestId = ++_requestId;
     if (reset) {
       _currentPage = 0;
+      _products = [];
       _isLoading = true;
       _errorMessage = null;
       notifyListeners();
@@ -115,6 +119,8 @@ class ProductProvider extends ChangeNotifier {
         sortDir: _sortDir,
       );
 
+      if (currentRequestId != _requestId) return;
+
       if (reset) {
         _products = pageResult.content;
       } else {
@@ -126,11 +132,14 @@ class ProductProvider extends ChangeNotifier {
       _isLastPage = pageResult.last;
       _currentPage++;
     } catch (e) {
+      if (currentRequestId != _requestId) return;
       _errorMessage = e.toString();
     } finally {
-      _isLoading = false;
-      _isLoadingMore = false;
-      notifyListeners();
+      if (currentRequestId == _requestId) {
+        _isLoading = false;
+        _isLoadingMore = false;
+        notifyListeners();
+      }
     }
   }
 

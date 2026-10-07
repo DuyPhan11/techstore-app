@@ -539,7 +539,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 // Auto-playing Promotional Banner Carousel (Admin Managed)
                 if (_banners.isNotEmpty) ...[
                   SizedBox(
-                    height: 168,
+                    height: 172,
                     child: PageView.builder(
                       controller: _bannerPageController,
                       itemCount: _banners.length,
@@ -700,11 +700,18 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 12),
 
-                if ((productProvider.isLoading || _isLoadingRecommendations) && displayList.isEmpty)
+                if (productProvider.isLoading || (_isLoadingRecommendations && displayList.isEmpty))
                   const Center(
                     child: Padding(
                       padding: EdgeInsets.symmetric(vertical: 40),
-                      child: CircularProgressIndicator(),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircularProgressIndicator(),
+                          SizedBox(height: 12),
+                          Text('Đang tải sản phẩm...', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
+                        ],
+                      ),
                     ),
                   )
                 else if (displayList.isEmpty)

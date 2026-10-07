@@ -12,12 +12,15 @@ import '../../utils/toast_helper.dart';
 import '../address/address_list_screen.dart';
 import '../auth/login_screen.dart';
 import '../auth/register_screen.dart';
-import '../auth/welcome_screen.dart';
+import '../order/buy_again_screen.dart';
 import '../cart/cart_screen.dart';
 import '../order/my_orders_screen.dart';
 import '../order/order_reviews_screen.dart';
 import '../coupon/customer_coupons_screen.dart';
 import '../product/wishlist_screen.dart';
+import '../product/product_detail_screen.dart';
+import '../../utils/currency_format.dart';
+import '../../widgets/safe_network_image.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'edit_profile_screen.dart';
 import 'recently_viewed_screen.dart';
@@ -41,6 +44,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     _loadReviewCounts();
     _loadRecentlyViewedCount();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final auth = Provider.of<AuthProvider>(context, listen: false);
+      if (auth.isAuthenticated) {
+        Provider.of<OrderProvider>(context, listen: false).fetchOrders(silent: true);
+      }
+    });
   }
 
   Future<void> _loadRecentlyViewedCount() async {
@@ -199,21 +208,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         Wrap(
                           spacing: 6,
                           children: auth.user!.roles.map((r) {
+                            String roleLabel = r.replaceFirst('ROLE_', '');
+                            Color bgColor = Colors.blue.shade50;
+                            Color borderColor = Colors.blue.shade200;
+                            Color textColor = AppColors.primary;
+
+                            if (r.contains('ADMIN')) {
+                              roleLabel = 'Quản trị viên';
+                              bgColor = Colors.purple.shade50;
+                              borderColor = Colors.purple.shade200;
+                              textColor = Colors.purple.shade700;
+                            } else if (r.contains('STAFF')) {
+                              roleLabel = 'Nhân viên';
+                              bgColor = Colors.amber.shade50;
+                              borderColor = Colors.amber.shade300;
+                              textColor = Colors.amber.shade900;
+                            } else if (r.contains('CUSTOMER')) {
+                              roleLabel = 'Khách hàng';
+                              bgColor = Colors.blue.shade50;
+                              borderColor = Colors.blue.shade200;
+                              textColor = AppColors.primary;
+                            }
+
                             return Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                               decoration: BoxDecoration(
-                                color: r.contains('ADMIN') ? Colors.purple.shade50 : Colors.blue.shade50,
+                                color: bgColor,
                                 borderRadius: BorderRadius.circular(6),
-                                border: Border.all(
-                                  color: r.contains('ADMIN') ? Colors.purple.shade200 : Colors.blue.shade200,
-                                ),
+                                border: Border.all(color: borderColor),
                               ),
                               child: Text(
-                                r.replaceFirst('ROLE_', ''),
+                                roleLabel,
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.bold,
-                                  color: r.contains('ADMIN') ? Colors.purple.shade700 : AppColors.primary,
+                                  color: textColor,
                                 ),
                               ),
                             );
@@ -351,6 +380,142 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ],
             const SizedBox(height: 16),
+
+            // Quick Buy Again section if user has purchased items
+            Consumer<OrderProvider>(
+              builder: (context, orderProv, _) {
+                final purchased = orderProv.purchasedProducts;
+                if (!auth.isAuthenticated || purchased.isEmpty) return const SizedBox.shrink();
+
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: const [
+                              Icon(Icons.replay_rounded, size: 20, color: Color(0xFF0D9488)),
+                              SizedBox(width: 8),
+                              Text(
+                                'Mua lại nhanh',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textDark,
+                                ),
+                              ),
+                            ],
+                          ),
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const BuyAgainScreen()),
+                              );
+                            },
+                            child: Row(
+                              children: const [
+                                Text(
+                                  'Xem tất cả',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF0D9488),
+                                  ),
+                                ),
+                                Icon(Icons.chevron_right, size: 16, color: Color(0xFF0D9488)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        height: 135,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: purchased.length > 8 ? 8 : purchased.length,
+                          separatorBuilder: (_, _) => const SizedBox(width: 10),
+                          itemBuilder: (context, idx) {
+                            final p = purchased[idx];
+                            return InkWell(
+                              borderRadius: BorderRadius.circular(12),
+                              onTap: () {
+                                if (p.productId > 0) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => ProductDetailScreen(productId: p.productId),
+                                    ),
+                                  );
+                                }
+                              },
+                              child: Container(
+                                width: 110,
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF8FAFC),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: AppColors.border),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: Center(
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(8),
+                                          child: SafeNetworkImage(
+                                            imageUrl: p.productImageUrl,
+                                            fit: BoxFit.contain,
+                                            width: double.infinity,
+                                            height: double.infinity,
+                                            fallbackIconSize: 24,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      p.productName,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.textDark,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      CurrencyHelper.format(p.unitPrice),
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.danger,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
 
             // Navigation Menu Options
             Material(
@@ -570,15 +735,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     },
                   ),
                   const Divider(height: 1, thickness: 0.8, color: AppColors.divider),
-                  ListTile(
-                    leading: const Icon(Icons.flash_on_rounded, color: AppColors.cyberPurple),
-                    title: const Text('Màn hình chào mừng (Cyber Welcome)', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                    subtitle: const Text('Giao diện phong cách Cyber TechStore', style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
-                    trailing: const Icon(Icons.chevron_right, color: AppColors.textLight),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+                  Consumer<OrderProvider>(
+                    builder: (context, orderProv, _) {
+                      final count = orderProv.purchasedProducts.length;
+                      return ListTile(
+                        leading: const Icon(Icons.replay_rounded, color: Color(0xFF0D9488)),
+                        title: const Text('Mua lại sản phẩm', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                        subtitle: Text(
+                          count > 0 ? '$count sản phẩm bạn đã từng mua' : 'Dễ dàng đặt lại các món đồ đã mua',
+                          style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (count > 0)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF0D9488),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  '$count',
+                                  style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            const SizedBox(width: 4),
+                            const Icon(Icons.chevron_right, color: AppColors.textLight),
+                          ],
+                        ),
+                        onTap: () {
+                          if (!auth.isAuthenticated) {
+                            Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+                            return;
+                          }
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const BuyAgainScreen()),
+                          );
+                        },
                       );
                     },
                   ),

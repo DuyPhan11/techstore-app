@@ -200,57 +200,74 @@ class _ProductCardState extends State<ProductCard> {
                           ),
                         ),
                       ),
-                      Material(
-                        color: product.isInStock ? AppColors.primaryLight : Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(20),
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(20),
-                          onTap: product.isInStock
-                              ? () async {
-                                  final auth = Provider.of<AuthProvider>(context, listen: false);
-                                  if (!auth.isAuthenticated) {
-                                    ToastHelper.showInfo(context, 'Vui lòng đăng nhập để mua hàng');
-                                    return;
-                                  }
-                                  final cart = Provider.of<CartProvider>(context, listen: false);
-                                  final ok = await cart.addToCart(product.id, quantity: 1);
-                                  if (context.mounted) {
-                                    if (ok) {
-                                      ToastHelper.showSuccess(context, 'Đã thêm vào giỏ hàng');
-                                    } else {
-                                      ToastHelper.showError(context, cart.errorMessage ?? 'Không thể thêm');
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: const Color(0xFFE2E8F0),
+                            width: 1,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.06),
+                              blurRadius: 4,
+                              offset: const Offset(0, 1.5),
+                            ),
+                          ],
+                        ),
+                        child: Material(
+                          color: Colors.transparent,
+                          shape: const CircleBorder(),
+                          child: InkWell(
+                            customBorder: const CircleBorder(),
+                            onTap: product.isInStock
+                                ? () async {
+                                    final auth = Provider.of<AuthProvider>(context, listen: false);
+                                    if (!auth.isAuthenticated) {
+                                      ToastHelper.showInfo(context, 'Vui lòng đăng nhập để mua hàng');
+                                      return;
+                                    }
+                                    final cart = Provider.of<CartProvider>(context, listen: false);
+                                    final ok = await cart.addToCart(product.id, quantity: 1);
+                                    if (context.mounted) {
+                                      if (ok) {
+                                        ToastHelper.showSuccess(context, 'Đã thêm vào giỏ hàng');
+                                      } else {
+                                        ToastHelper.showError(context, cart.errorMessage ?? 'Không thể thêm');
+                                      }
                                     }
                                   }
-                                }
-                              : null,
-                          child: Padding(
-                            padding: const EdgeInsets.all(6.5),
-                            child: Stack(
-                              clipBehavior: Clip.none,
-                              alignment: Alignment.center,
-                              children: [
-                                Icon(
-                                  Icons.shopping_bag_outlined,
-                                  size: 16,
-                                  color: product.isInStock ? AppColors.primary : AppColors.textLight,
-                                ),
-                                Positioned(
-                                  top: -1,
-                                  right: -2,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(0.5),
-                                    decoration: BoxDecoration(
-                                      color: product.isInStock ? AppColors.primary : AppColors.textLight,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      Icons.add,
-                                      size: 7,
-                                      color: Colors.white,
+                                : null,
+                            child: Padding(
+                              padding: const EdgeInsets.all(6.5),
+                              child: Stack(
+                                clipBehavior: Clip.none,
+                                alignment: Alignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.shopping_bag_outlined,
+                                    size: 16,
+                                    color: product.isInStock ? AppColors.textDark : AppColors.textLight,
+                                  ),
+                                  Positioned(
+                                    top: -1,
+                                    right: -2,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(0.5),
+                                      decoration: BoxDecoration(
+                                        color: product.isInStock ? AppColors.primary : AppColors.textLight,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.add,
+                                        size: 7,
+                                        color: Colors.white,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
